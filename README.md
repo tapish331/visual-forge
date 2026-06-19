@@ -51,6 +51,37 @@ The intended workflow is:
 
 The creator should normally interact with the runner skill, not a pile of manual scripts.
 
+## End-to-End Flow
+
+The human normally talks only to `visual-forge-runner`. Codex makes judgment-heavy decisions and creates or modifies templates and base assets. Python performs deterministic work and updates `project.json`.
+
+The script names below are intended interfaces for future implementation; most of them do not exist yet.
+
+| Step | Stage | Human | Codex Runner | Python Script |
+| ---: | --- | --- | --- | --- |
+| 1 | Create project files | Add `script.txt` and `raw.mp4` to a project folder. | No action unless asked to help organize files. | None |
+| 2 | Initialize project | Ask the runner to start the project. | Invoke project initialization. | `app/main.py init`, backed by `app/project.py` |
+| 3 | Validate project/status | Review missing-file or setup warnings if needed. | Invoke status and explain what is missing or ready. | `app/main.py status`, backed by `app/project.py` |
+| 4 | Probe raw video | No action. | Ask Python to inspect media properties instead of reasoning from the file manually. | `app/media_probe.py` |
+| 5 | Extract audio | No action. | Trigger deterministic audio extraction. | `app/audio.py` |
+| 6 | Transcribe narration | No action. | Run transcription and store raw transcript chunks. | `app/transcribe.py` |
+| 7 | Align script to speech | Inspect later if timestamps feel wrong. | Use alignment output and intervene only when correction is needed. | `app/align.py` |
+| 8 | Create chunks | No action. | Ask Python to split the long video into checkpoint-sized chunks. | `app/chunks.py` |
+| 9 | Show status | Review current progress. | Summarize what is complete, failed, or next. | `app/status.py` |
+| 10 | Plan visuals per chunk | Give feedback if visual choices feel wrong. | Plan useful visuals for one chunk and persist the plan. | `app/project.py` |
+| 11 | Inspect template inventory | No action. | Check whether required visual capabilities already exist. | `app/templates.py` |
+| 12 | Create missing template | Review generated output later. | Write or modify `templates/<template_id>.py`. | `app/templates.py` validates the template |
+| 13 | Create missing base asset | Review generated output later. | Create the reusable base asset. | `app/assets.py` validates, hashes, and normalizes the asset |
+| 14 | Write render items | No action. | Convert the visual plan into exact render instructions. | `app/render_plan.py` |
+| 15 | Render preview | Inspect one visual or one chunk. | Run a preview before final rendering. | `app/preview.py` |
+| 16 | Apply corrections | Tell the runner what is wrong. | Interpret feedback and target the correction. | `app/corrections.py` |
+| 17 | Render chunk | Inspect chunk output. | Run deterministic render after templates and assets are ready. | `app/render.py` |
+| 18 | Check cache | No action. | Avoid regenerating unchanged work. | `app/cache.py` |
+| 19 | Compose final video | Ask for final render when ready. | Confirm all chunks are complete before composing. | `app/compose.py` |
+| 20 | Verify final video | Watch the final output. | Explain final output and any mechanical warnings. | `app/verify.py` |
+
+Codex should not load the full 25-minute project into context. Python should expose compact summaries for Codex to inspect, and Codex should open only the current chunk, template, or reference material needed for the next decision.
+
 ## Project Structure
 
 The intended concise structure is:
@@ -321,7 +352,7 @@ templates/__init__.py
 inputs/sample.json
 ```
 
-The current Python files and sample input are placeholders. The runner skill, project model, CLI commands, script alignment, template generation, rendering, previews, caching, and final composition pipeline are not implemented yet.
+The current Python files and sample input are placeholders. The runner skill, project model, CLI commands, script alignment, template generation, rendering, previews, caching, final composition pipeline, and end-to-end flow scripts are not implemented yet.
 
 ## Planned First Milestone
 
