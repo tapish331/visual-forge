@@ -11,6 +11,15 @@ from pathlib import Path
 from typing import cast
 
 from .align import align_project, build_alignment_review, format_alignment_result, format_alignment_review
+from .assets import (
+    AssetError,
+    build_asset_inventory,
+    format_asset_inventory,
+    format_asset_validation,
+    format_register_asset_result,
+    register_asset,
+    validate_asset,
+)
 from .audio import extract_project_audio, format_audio_extract_result
 from .chunks import DEFAULT_MAX_SECONDS, DEFAULT_MIN_SECONDS, DEFAULT_TARGET_SECONDS
 from .chunks import approve_camera_only, build_chunks_summary, create_chunks
@@ -47,6 +56,8 @@ from .templates import (
     build_inventory,
     format_inventory,
     format_template_validation,
+    format_template_scaffold,
+    scaffold_template,
     validate_template_file,
 )
 from .transcribe import DEFAULT_TRANSCRIBE_COMPUTE_TYPE, DEFAULT_TRANSCRIBE_DEVICE, DEFAULT_TRANSCRIBE_MODEL
@@ -55,9 +66,11 @@ from .transcribe import format_transcribe_result, transcribe_project
 from .verify import format_verify_final_result, verify_project_final
 from .visual_intents import (
     apply_visual_plan_from_json,
+    bind_visual_intent_from_json,
     build_planning_context,
     build_visual_intents_summary,
     format_apply_visual_plan_result,
+    format_bind_visual_intent_result,
     format_planning_context,
     format_visual_intents_summary,
 )
@@ -242,6 +255,17 @@ def build_parser() -> argparse.ArgumentParser:
     visual_intents_parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
     visual_intents_parser.set_defaults(handler=handle_visual_intents)
 
+    bind_visual_intent_parser = subparsers.add_parser(
+        "bind-visual-intent",
+        help="Bind one Codex visual intent to a ready template",
+    )
+    bind_visual_intent_parser.add_argument("project_dir", type=Path)
+    bind_visual_intent_parser.add_argument("intent_id")
+    bind_visual_intent_parser.add_argument("--template", required=True, help="Ready template ID or Python file")
+    bind_visual_intent_parser.add_argument("--params-json", required=True, help="Template params as a JSON object")
+    bind_visual_intent_parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    bind_visual_intent_parser.set_defaults(handler=handle_bind_visual_intent, mutates_project=True)
+
     render_chunk_parser = subparsers.add_parser("render-chunk", help="Render one previewed chunk to MP4")
     render_chunk_parser.add_argument("project_dir", type=Path)
     render_chunk_parser.add_argument("chunk_id")
@@ -261,6 +285,32 @@ def build_parser() -> argparse.ArgumentParser:
     templates_parser = subparsers.add_parser("templates", help="List visual generator templates")
     templates_parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
     templates_parser.set_defaults(handler=handle_templates)
+
+    scaffold_template_parser = subparsers.add_parser(
+        "scaffold-template",
+        help="Create a non-bindable draft template for one capability",
+    )
+    scaffold_template_parser.add_argument("template_id")
+    scaffold_template_parser.add_argument("--capability", required=True)
+    scaffold_template_parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    scaffold_template_parser.set_defaults(handler=handle_scaffold_template)
+
+    assets_parser = subparsers.add_parser("assets", help="List registered reusable assets")
+    assets_parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    assets_parser.set_defaults(handler=handle_assets)
+
+    register_asset_parser = subparsers.add_parser("register-asset", help="Register one reusable PNG asset")
+    register_asset_parser.add_argument("asset_path", type=Path)
+    register_asset_parser.add_argument("--id", dest="asset_id", required=True)
+    register_asset_parser.add_argument("--version", default="1.0.0")
+    register_asset_parser.add_argument("--replace", action="store_true", help="Replace an existing registration")
+    register_asset_parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    register_asset_parser.set_defaults(handler=handle_register_asset)
+
+    validate_asset_parser = subparsers.add_parser("validate-asset", help="Validate one registered reusable asset")
+    validate_asset_parser.add_argument("asset_id")
+    validate_asset_parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    validate_asset_parser.set_defaults(handler=handle_validate_asset)
 
     validate_template_parser = subparsers.add_parser("validate-template", help="Validate one template file")
     validate_template_parser.add_argument("template_file", type=Path)
@@ -556,6 +606,15 @@ def handle_visual_intents(args: argparse.Namespace) -> int:
     return 0
 
 
+def handle_bind_visual_intent(args: argparse.Namespace) -> int:
+    result = bind_visual_intent_from_json(args.project_dir, args.intent_id, args.template, args.params_json)
+    if args.json:
+        print(json.dumps(result, separators=(",", ":")))
+    else:
+        print(format_bind_visual_intent_result(result))
+    return 0 if result["success"] else 1
+
+
 def handle_render_chunk(args: argparse.Namespace) -> int:
     result = render_project_chunk(args.project_dir, args.chunk_id)
     if args.json:
@@ -590,6 +649,47 @@ def handle_templates(args: argparse.Namespace) -> int:
     else:
         print(format_inventory(inventory))
     return 0
+
+
+def handle_scaffold_template(args: argparse.Namespace) -> int:
+    result = scaffold_template(args.template_id, args.capability)
+    if args.json:
+        print(json.dumps(result, separators=(",", ":")))
+    else:
+        print(format_template_scaffold(result))
+    return 0 if result["success"] else 1
+
+
+def handle_assets(args: argparse.Namespace) -> int:
+    inventory = build_asset_inventory()
+    if args.json:
+        print(json.dumps(inventory, separators=(",", ":")))
+    else:
+        print(format_asset_inventory(inventory))
+    return 0
+
+
+def handle_register_asset(args: argparse.Namespace) -> int:
+    result = register_asset(
+        args.asset_path,
+        args.asset_id,
+        args.version,
+        replace=bool(args.replace),
+    )
+    if args.json:
+        print(json.dumps(result, separators=(",", ":")))
+    else:
+        print(format_register_asset_result(result))
+    return 0 if result["success"] else 1
+
+
+def handle_validate_asset(args: argparse.Namespace) -> int:
+    result = validate_asset(args.asset_id)
+    if args.json:
+        print(json.dumps(result, separators=(",", ":")))
+    else:
+        print(format_asset_validation(result))
+    return 0 if result["valid"] else 1
 
 
 def handle_validate_template(args: argparse.Namespace) -> int:
@@ -728,7 +828,7 @@ def main(argv: list[str] | None = None) -> int:
         with capture_console(session, forward=forward_output):
             try:
                 exit_code = _run_cli(raw_argv, session)
-            except (ProjectError, TemplateError) as exc:
+            except (AssetError, ProjectError, TemplateError) as exc:
                 print(f"error: {exc}", file=sys.stderr)
                 exit_code = 1
             except ProjectBusyError as exc:

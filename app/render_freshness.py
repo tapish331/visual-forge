@@ -26,9 +26,10 @@ from .artifacts import (
     sha256_json_fingerprint,
     stat_fingerprint,
 )
+from .assets import DEFAULT_ASSETS_DIR
 from .layout import artifact_path
 from .project import JsonObject, JsonValue, ProjectState
-from .render_template import resolve_template_file
+from .render_template import resolve_template_file, validate_template_params
 from .templates import validate_template_file
 from .timeline import (
     build_timeline_chunk_freshness,
@@ -53,19 +54,26 @@ def build_preview_provenance(
     data: ProjectState,
     template_ref: str,
     relative_output: Path,
+    params: dict[str, object] | None = None,
+    assets_dir: Path = DEFAULT_ASSETS_DIR,
 ) -> JsonObject:
     template_file = resolve_template_file(template_ref)
     if template_file is None:
         raise ValueError(f"Template not found after successful render: {template_ref}")
     info = validate_template_file(template_file)
     version = info["template_version"]
-    if not info["valid"] or version is None:
+    if not info["valid"] or not info["ready"] or version is None:
         detail = "; ".join(info["errors"]) or "template version is missing"
         raise ValueError(f"Template provenance is invalid: {detail}")
+    validation = validate_template_params(template_ref, params or {}, assets_dir=assets_dir)
+    if not validation["valid"]:
+        raise ValueError(f"Template asset provenance is invalid: {'; '.join(validation['errors'])}")
     output_file = artifact_path(project_dir, data, relative_output)
     return {
         "template_version": version,
         "template_fingerprint": sha256_fingerprint(template_file),
+        "required_asset_ids": cast(JsonValue, validation["required_assets"]),
+        "asset_fingerprints": cast(JsonValue, validation["asset_fingerprints"]),
         "artifact_fingerprint": sha256_fingerprint(output_file),
     }
 
@@ -74,6 +82,7 @@ def build_preview_freshness(
     project_dir: Path,
     data: ProjectState,
     preview: JsonObject | None,
+    assets_dir: Path = DEFAULT_ASSETS_DIR,
 ) -> FreshnessResult:
     if preview is None:
         return freshness(FRESHNESS_NOT_CREATED, REASON_METADATA_MISSING)
@@ -87,7 +96,15 @@ def build_preview_freshness(
         return freshness(FRESHNESS_MISSING, REASON_ARTIFACT_MISSING)
     artifact_expected = fingerprint_from_json(preview.get("artifact_fingerprint"))
     template_expected = fingerprint_from_json(preview.get("template_fingerprint"))
-    if artifact_expected is None or template_expected is None or template_version is None:
+    required_assets_value = preview.get("required_asset_ids")
+    asset_fingerprints_value = preview.get("asset_fingerprints")
+    params_value = preview.get("params")
+    if (
+        artifact_expected is None
+        or template_expected is None
+        or template_version is None
+        or not isinstance(params_value, dict)
+    ):
         return freshness(FRESHNESS_UNVERIFIED, REASON_FINGERPRINT_MISSING)
     template_file = resolve_template_file(template_ref)
     if template_file is None or not template_file.is_file():
@@ -100,8 +117,26 @@ def build_preview_freshness(
     except OSError:
         return freshness(FRESHNESS_MISSING, REASON_ARTIFACT_MISSING)
     info = validate_template_file(template_file)
-    if not info["valid"] or info["template_version"] != template_version:
+    if not info["valid"] or not info["ready"] or info["template_version"] != template_version:
         return freshness(FRESHNESS_STALE, REASON_UPSTREAM_STALE)
+    params = cast(dict[str, object], params_value)
+    validation = validate_template_params(template_ref, params, assets_dir=assets_dir)
+    if not validation["valid"]:
+        return freshness(FRESHNESS_STALE, REASON_UPSTREAM_STALE)
+    if not isinstance(required_assets_value, list) or not isinstance(asset_fingerprints_value, dict):
+        if validation["required_assets"]:
+            return freshness(FRESHNESS_UNVERIFIED, REASON_FINGERPRINT_MISSING)
+        return freshness(FRESHNESS_CURRENT, None)
+    recorded_asset_ids = sorted(item for item in required_assets_value if isinstance(item, str))
+    if recorded_asset_ids != validation["required_assets"]:
+        return freshness(FRESHNESS_STALE, REASON_UPSTREAM_STALE)
+    recorded_assets = cast(dict[object, object], asset_fingerprints_value)
+    if set(recorded_assets) != set(validation["asset_fingerprints"]):
+        return freshness(FRESHNESS_STALE, REASON_UPSTREAM_STALE)
+    for asset_id, current_fingerprint in validation["asset_fingerprints"].items():
+        expected_asset = fingerprint_from_json(recorded_assets.get(asset_id))
+        if expected_asset is None or expected_asset != current_fingerprint:
+            return freshness(FRESHNESS_STALE, REASON_UPSTREAM_STALE)
     return freshness(FRESHNESS_CURRENT, None)
 
 
@@ -151,6 +186,7 @@ def build_chunk_render_freshness(
     project_dir: Path,
     data: ProjectState,
     chunk_id: str,
+    assets_dir: Path = DEFAULT_ASSETS_DIR,
 ) -> FreshnessResult:
     chunk = _find_chunk(data, chunk_id)
     metadata = _chunk_render_metadata(data, chunk_id)
@@ -213,7 +249,7 @@ def build_chunk_render_freshness(
         if preview_id is None:
             return freshness(FRESHNESS_STALE, REASON_UPSTREAM_STALE)
         preview = _find_preview(data, preview_id)
-        preview_freshness = build_preview_freshness(project_dir, data, preview)
+        preview_freshness = build_preview_freshness(project_dir, data, preview, assets_dir)
         if not is_current(preview_freshness):
             if preview_freshness["state"] == FRESHNESS_UNVERIFIED:
                 return preview_freshness
@@ -230,12 +266,13 @@ def build_chunk_render_freshness(
 def build_chunk_render_freshness_map(
     project_dir: Path,
     data: ProjectState,
+    assets_dir: Path = DEFAULT_ASSETS_DIR,
 ) -> dict[str, FreshnessResult]:
     results: dict[str, FreshnessResult] = {}
     for chunk in data["chunks"]:
         chunk_id = _string_field(chunk, "id")
         if chunk_id is not None:
-            results[chunk_id] = build_chunk_render_freshness(project_dir, data, chunk_id)
+            results[chunk_id] = build_chunk_render_freshness(project_dir, data, chunk_id, assets_dir)
     return results
 
 

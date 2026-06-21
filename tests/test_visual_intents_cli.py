@@ -102,7 +102,7 @@ def test_unbound_and_capability_gap_are_soft_planning_states(tmp_path: Path) -> 
     )
     gap_project = prepare_project(
         tmp_path / "gap",
-        [aligned_block("block_001", 0.0, 12.0, "A newspaper headline requires a new capability.")],
+        [aligned_block("block_001", 0.0, 12.0, "A timeline map requires a new capability.")],
     )
 
     unbound = run_cli(
@@ -120,7 +120,7 @@ def test_unbound_and_capability_gap_are_soft_planning_states(tmp_path: Path) -> 
         "--chunk",
         "chunk_001",
         "--plan-json",
-        unbound_plan("block_001", "newspaper_headline"),
+        unbound_plan("block_001", "timeline_map"),
         "--json",
     )
 
@@ -138,7 +138,114 @@ def test_unbound_and_capability_gap_are_soft_planning_states(tmp_path: Path) -> 
 def test_visual_intents_gaps_only_filters_results(tmp_path: Path) -> None:
     project_dir = prepare_project(
         tmp_path,
-        [aligned_block("block_001", 0.0, 12.0, "A missing newspaper capability should be listed.")],
+        [aligned_block("block_001", 0.0, 12.0, "A missing timeline capability should be listed.")],
+    )
+    assert run_cli(
+        "apply-visual-plan",
+        project_dir,
+        "--chunk",
+        "chunk_001",
+        "--plan-json",
+        unbound_plan("block_001", "timeline_map"),
+    ).returncode == 0
+
+    result = run_cli("visual-intents", project_dir, "--chunk", "chunk_001", "--gaps-only", "--json")
+
+    assert result.returncode == 0, result.stderr
+    summary = json_object(result.stdout)
+    assert summary["total"] == 1
+    assert record_list(summary, "intents")[0]["intent_type"] == "timeline_map"
+
+
+def test_targeted_binding_preserves_unrelated_intents_and_manual_visuals(tmp_path: Path) -> None:
+    project_dir = prepare_project(
+        tmp_path,
+        [aligned_block("block_001", 0.0, 12.0, "A report and a key point need separate visual treatment.")],
+    )
+    plan = json.dumps(
+        {
+            "intents": [
+                {
+                    "intent_type": "newspaper_headline",
+                    "purpose": "Present the claim as contemporary reporting.",
+                    "start": 1.0,
+                    "end": 5.0,
+                    "source_block_ids": ["block_001"],
+                    "content": {"headline": "A New Era Begins"},
+                    "binding": None,
+                },
+                {
+                    "intent_type": "key_point",
+                    "purpose": "Summarize the key point.",
+                    "start": 6.0,
+                    "end": 10.0,
+                    "source_block_ids": ["block_001"],
+                    "content": {"title": "Key point"},
+                    "binding": None,
+                },
+            ]
+        }
+    )
+    applied = run_cli("apply-visual-plan", project_dir, "--chunk", "chunk_001", "--plan-json", plan, "--json")
+    assert applied.returncode == 0, applied.stdout + applied.stderr
+    intent_id = next(
+        str(intent["id"])
+        for intent in record_list(load_project(project_dir), "visual_intents")
+        if intent["intent_type"] == "newspaper_headline"
+    )
+    manual = run_cli(
+        "add-visual",
+        project_dir,
+        "--chunk",
+        "chunk_001",
+        "--template",
+        "simple_card",
+        "--start",
+        "10",
+        "--end",
+        "11",
+        "--params-json",
+        '{"title":"Manual"}',
+    )
+    assert manual.returncode == 0, manual.stdout + manual.stderr
+
+    first = run_cli(
+        "bind-visual-intent",
+        project_dir,
+        intent_id,
+        "--template",
+        "newspaper_headline",
+        "--params-json",
+        '{"headline":"A New Era Begins"}',
+        "--json",
+    )
+    second = run_cli(
+        "bind-visual-intent",
+        project_dir,
+        intent_id,
+        "--template",
+        "newspaper_headline",
+        "--params-json",
+        '{"headline":"A New Era Begins"}',
+        "--json",
+    )
+
+    assert first.returncode == 0, first.stdout + first.stderr
+    assert second.returncode == 0, second.stdout + second.stderr
+    assert json_object(second.stdout)["reused_existing"] is True
+    state = load_project(project_dir)
+    intents = record_list(state, "visual_intents")
+    assert sorted(str(intent["status"]) for intent in intents) == ["bound", "unbound"]
+    visuals = record_list(state, "visuals")
+    assert len(visuals) == 2
+    assert any(visual.get("planner") == "codex_v1" and visual.get("intent_id") == intent_id for visual in visuals)
+    assert any(visual.get("planner") is None for visual in visuals)
+
+
+def test_targeted_binding_failure_deduplicates_and_success_resolves(tmp_path: Path) -> None:
+    project_dir = prepare_project(
+        tmp_path,
+        [aligned_block("block_001", 0.0, 12.0, "A newspaper report can use the registered capability.")],
     )
     assert run_cli(
         "apply-visual-plan",
@@ -148,13 +255,49 @@ def test_visual_intents_gaps_only_filters_results(tmp_path: Path) -> None:
         "--plan-json",
         unbound_plan("block_001", "newspaper_headline"),
     ).returncode == 0
+    intent_id = str(record_list(load_project(project_dir), "visual_intents")[0]["id"])
 
-    result = run_cli("visual-intents", project_dir, "--chunk", "chunk_001", "--gaps-only", "--json")
+    first = run_cli(
+        "bind-visual-intent",
+        project_dir,
+        intent_id,
+        "--template",
+        "newspaper_headline",
+        "--params-json",
+        "{}",
+        "--json",
+    )
+    second = run_cli(
+        "bind-visual-intent",
+        project_dir,
+        intent_id,
+        "--template",
+        "newspaper_headline",
+        "--params-json",
+        "{}",
+        "--json",
+    )
+    assert first.returncode == 1
+    assert second.returncode == 1
+    failures = record_list(load_project(project_dir), "failures")
+    assert len(failures) == 1
+    assert failures[0]["stage"] == "visual_intent_bind"
+    assert failures[0]["attempt_count"] == 2
 
-    assert result.returncode == 0, result.stderr
-    summary = json_object(result.stdout)
-    assert summary["total"] == 1
-    assert record_list(summary, "intents")[0]["intent_type"] == "newspaper_headline"
+    success = run_cli(
+        "bind-visual-intent",
+        project_dir,
+        intent_id,
+        "--template",
+        "newspaper_headline",
+        "--params-json",
+        '{"headline":"A New Era Begins"}',
+        "--json",
+    )
+
+    assert success.returncode == 0, success.stdout + success.stderr
+    resolved = record_list(load_project(project_dir), "failures")[0]
+    assert resolved["status"] == "resolved"
 
 
 def test_invalid_plan_and_mixed_ownership_fail_without_replacing_visual_records(tmp_path: Path) -> None:
@@ -287,11 +430,11 @@ def test_next_routes_context_unbound_gap_and_bound_states(tmp_path: Path) -> Non
         "--chunk",
         "chunk_001",
         "--plan-json",
-        unbound_plan("block_001", "newspaper_headline"),
+        unbound_plan("block_001", "timeline_map"),
     ).returncode == 0
     gap_next = json_object(run_cli("next", gap_project, "--json").stdout)
     assert gap_next["human_input_required"] is True
-    assert "newspaper_headline" in cast(str, gap_next["recommended_action"])
+    assert "timeline_map" in cast(str, gap_next["recommended_action"])
 
     bound_project = prepare_project(
         tmp_path / "bound",

@@ -32,8 +32,14 @@ python -m app.main visual-intents <project_dir> --chunk <chunk_id> --gaps-only -
 ```
 
 - `bound`: the intent created an executable visual; continue to chunk preview when all intents are bound.
-- `unbound`: candidate templates exist; reapply the plan with a suitable binding.
-- `capability_gap`: no suitable template exists; report the exact intent type and read `template-contract.md`.
+- `unbound`: candidate templates exist; bind the intent with `bind-visual-intent`.
+- `capability_gap`: no suitable ready template exists; report the exact intent type and read `capability-generation.md` when creation is authorized.
+
+Bind one existing intent without replacing the rest of the plan:
+
+```powershell
+python -m app.main bind-visual-intent <project_dir> <intent_id> --template <template_id> --params-json '<json>' --json
+```
 
 Capability gaps are planning results, not failures.
 

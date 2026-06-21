@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "assets": [
+    {
+      "id": "creator_journey_texture",
+      "version": "1.0.0",
+      "type": "image",
+      "path": "images/creator_journey_texture.png",
+      "media_type": "image/png",
+      "width": 1920,
+      "height": 1080,
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 56975,
+        "sha256": "1510bb913567d03495611f46137f5975b07bc7300c3cbb725e9b32f1017045f1"
+      },
+      "registered_at": "2026-06-21T21:49:44Z",
+      "updated_at": "2026-06-21T21:49:44Z"
+    },
+    {
+      "id": "newspaper_base",
+      "version": "1.0.0",
+      "type": "image",
+      "path": "images/newspaper_base.png",
+      "media_type": "image/png",
+      "width": 1920,
+      "height": 1080,
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 224106,
+        "sha256": "fd14d60a50ed409c94cf199a4b3c0cf364a5bba8fdfb1c44f1e167f6a531b9fc"
+      },
+      "registered_at": "2026-06-21T19:43:05Z",
+      "updated_at": "2026-06-21T19:43:05Z"
+    }
+  ]
+}

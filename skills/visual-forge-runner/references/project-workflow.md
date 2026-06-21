@@ -24,7 +24,7 @@ python -m app.main init-from-input <input_dir> --json
 If `human_input_required` is true:
 
 - `missing_inputs`: tell the human which files are missing.
-- `in_progress` with a capability gap: report the missing capability and stop before rendering.
+- `in_progress` with a capability gap: report it, or read `capability-generation.md` when the human asked to create missing capabilities.
 - `in_progress` after heuristic fallback found no candidates: ask the human to add visuals or approve camera-only.
 - `complete`: tell the human to review the final video.
 
@@ -48,7 +48,7 @@ For `in_progress`, operate on the earliest chunk needing work:
 - `new` + `visuals`: `preview <project> --chunk <chunk_id> --json`
 - `new` + no intents: run `planning-context`, author intents, then run `apply-visual-plan`
 - `new` + unbound intents: inspect `visual-intents` and reapply with suitable bindings
-- `new` + capability gaps: report the missing capability and route to `template-contract.md`
+- `new` + capability gaps: report the missing capability and route to `capability-generation.md`
 - `new` + planner `no_candidates`: stop for manual visuals or camera-only approval
 - `previewed`: `render-chunk <project> <chunk_id> --json`
 - stale rendered visual chunk: refresh `preview --chunk`, then render later

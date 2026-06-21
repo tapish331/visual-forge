@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from app.templates import build_inventory, validate_template_file
+from app.templates import build_inventory, scaffold_template, validate_template_file
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -45,6 +45,14 @@ def test_simple_card_passes_contract_validation() -> None:
     assert result.returncode == 0, result.stderr
     assert "Template: simple_card" in result.stdout
     assert "Status: valid" in result.stdout
+
+
+def test_newspaper_template_is_ready_and_asset_backed() -> None:
+    result = validate_template_file(REPO_ROOT / "templates" / "newspaper_headline.py")
+
+    assert result["valid"] is True
+    assert result["ready"] is True
+    assert result["capabilities"] == ["newspaper_headline"]
 
 
 def test_validate_template_json_returns_valid_result() -> None:
@@ -124,6 +132,21 @@ def test_invalid_templates_appear_in_inventory_without_breaking_scan(tmp_path: P
     invalid_entries = [item for item in inventory["templates"] if item["name"] == "invalid_template"]
     assert len(invalid_entries) == 1
     assert invalid_entries[0]["valid"] is False
+
+
+def test_scaffold_template_is_valid_draft_and_not_ready(tmp_path: Path) -> None:
+    result = scaffold_template("timeline_map", "timeline_map", tmp_path)
+    duplicate = scaffold_template("timeline_map", "timeline_map", tmp_path)
+
+    assert result["success"] is True
+    assert duplicate["success"] is False
+    info = validate_template_file(tmp_path / "timeline_map.py")
+    assert info["valid"] is True
+    assert info["status"] == "draft"
+    assert info["ready"] is False
+    inventory = build_inventory(tmp_path)
+    assert inventory["draft_count"] == 1
+    assert inventory["ready_count"] == 0
 
 
 def write_contract_template(path: Path, metadata_body: str) -> Path:

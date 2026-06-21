@@ -14,6 +14,7 @@ from .project import JsonObject, JsonValue
 
 
 ALLOWED_OUTPUT_TYPES = {"png", "png_sequence", "mp4"}
+ALLOWED_TEMPLATE_STATUSES = {"draft", "ready"}
 DEFAULT_TEMPLATES_DIR = Path("templates")
 CAPABILITY_PATTERN = re.compile(r"^[a-z0-9]+(?:_[a-z0-9]+)*$")
 
@@ -29,6 +30,8 @@ class TemplateInfo(TypedDict):
     template_id: str | None
     template_version: str | None
     output_type: str | None
+    status: str
+    ready: bool
     capabilities: list[str]
     metadata: JsonObject
     errors: list[str]
@@ -38,7 +41,17 @@ class TemplateInventory(TypedDict):
     total: int
     valid_count: int
     invalid_count: int
+    ready_count: int
+    draft_count: int
     templates: list[TemplateInfo]
+
+
+class TemplateScaffoldResult(TypedDict):
+    template_id: str
+    capability: str
+    path: str
+    success: bool
+    errors: list[str]
 
 
 def build_inventory(templates_dir: Path = DEFAULT_TEMPLATES_DIR) -> TemplateInventory:
@@ -49,6 +62,8 @@ def build_inventory(templates_dir: Path = DEFAULT_TEMPLATES_DIR) -> TemplateInve
         "total": len(templates),
         "valid_count": valid_count,
         "invalid_count": len(templates) - valid_count,
+        "ready_count": sum(1 for template in templates if template["ready"]),
+        "draft_count": sum(1 for template in templates if template["valid"] and template["status"] == "draft"),
         "templates": templates,
     }
 
@@ -72,27 +87,33 @@ def validate_template_file(template_file: Path) -> TemplateInfo:
     template_id: str | None = None
     template_version: str | None = None
     output_type: str | None = None
+    status = "ready"
     capabilities: list[str] = []
 
     if not template_file.exists():
         errors.append(f"Template file not found: {template_file}")
-        return _template_info(template_file, False, template_id, template_version, output_type, capabilities, metadata, errors)
+        return _template_info(template_file, False, template_id, template_version, output_type, status, capabilities, metadata, errors)
     if not template_file.is_file():
         errors.append(f"Template path is not a file: {template_file}")
-        return _template_info(template_file, False, template_id, template_version, output_type, capabilities, metadata, errors)
+        return _template_info(template_file, False, template_id, template_version, output_type, status, capabilities, metadata, errors)
     if template_file.suffix != ".py":
         errors.append(f"Template file must be a Python file: {template_file}")
-        return _template_info(template_file, False, template_id, template_version, output_type, capabilities, metadata, errors)
+        return _template_info(template_file, False, template_id, template_version, output_type, status, capabilities, metadata, errors)
 
     try:
         module = import_template_module(template_file)
     except Exception as exc:  # noqa: BLE001 - template import failures are inventory data.
         errors.append(f"Could not import template: {exc}")
-        return _template_info(template_file, False, template_id, template_version, output_type, capabilities, metadata, errors)
+        return _template_info(template_file, False, template_id, template_version, output_type, status, capabilities, metadata, errors)
 
     template_id = _read_string_attr(module, "TEMPLATE_ID", errors)
     template_version = _read_string_attr(module, "TEMPLATE_VERSION", errors)
     output_type = _read_string_attr(module, "OUTPUT_TYPE", errors)
+    status_value: object = getattr(module, "TEMPLATE_STATUS", "ready")
+    if not isinstance(status_value, str) or status_value not in ALLOWED_TEMPLATE_STATUSES:
+        errors.append("TEMPLATE_STATUS must be 'draft' or 'ready' when provided")
+    else:
+        status = status_value
     if output_type is not None and output_type not in ALLOWED_OUTPUT_TYPES:
         errors.append(
             "OUTPUT_TYPE must be one of "
@@ -119,6 +140,7 @@ def validate_template_file(template_file: Path) -> TemplateInfo:
         template_id,
         template_version,
         output_type,
+        status,
         capabilities,
         metadata,
         errors,
@@ -143,13 +165,18 @@ def format_inventory(inventory: TemplateInventory) -> str:
         f"Templates: {inventory['total']}",
         f"Valid: {inventory['valid_count']}",
         f"Invalid: {inventory['invalid_count']}",
+        f"Ready: {inventory['ready_count']}",
+        f"Draft: {inventory['draft_count']}",
     ]
     for template in inventory["templates"]:
         status = "valid" if template["valid"] else "invalid"
         template_id = template["template_id"] or template["name"]
         output_type = template["output_type"] or "unknown"
         version = template["template_version"] or "unknown"
-        lines.append(f"- {template_id} ({status}) {output_type} v{version}: {template['path']}")
+        lines.append(
+            f"- {template_id} ({status}) {output_type} v{version} "
+            f"[{template['status']}]: {template['path']}"
+        )
         for error in template["errors"]:
             lines.append(f"  error: {error}")
     return "\n".join(lines)
@@ -163,6 +190,7 @@ def format_template_validation(template: TemplateInfo) -> str:
         lines.append(f"Version: {template['template_version']}")
     if template["output_type"] is not None:
         lines.append(f"Output type: {template['output_type']}")
+    lines.append(f"Template status: {template['status']}")
     for error in template["errors"]:
         lines.append(f"Error: {error}")
     return "\n".join(lines)
@@ -174,6 +202,7 @@ def _template_info(
     template_id: str | None,
     template_version: str | None,
     output_type: str | None,
+    status: str,
     capabilities: list[str],
     metadata: JsonObject,
     errors: list[str],
@@ -185,8 +214,102 @@ def _template_info(
         "template_id": template_id,
         "template_version": template_version,
         "output_type": output_type,
+        "status": status,
+        "ready": valid and status == "ready",
         "capabilities": capabilities,
         "metadata": metadata,
+        "errors": errors,
+    }
+
+
+def scaffold_template(
+    template_id: str,
+    capability: str,
+    templates_dir: Path = DEFAULT_TEMPLATES_DIR,
+) -> TemplateScaffoldResult:
+    errors: list[str] = []
+    if not CAPABILITY_PATTERN.fullmatch(template_id):
+        errors.append("Template ID must be lowercase snake-case.")
+    if not CAPABILITY_PATTERN.fullmatch(capability):
+        errors.append("Capability must be lowercase snake-case.")
+    path = templates_dir / f"{template_id}.py"
+    if path.exists():
+        errors.append(f"Template already exists: {path}")
+    if errors:
+        return _scaffold_result(template_id, capability, path, False, errors)
+
+    source = _template_scaffold_source(template_id, capability)
+    try:
+        templates_dir.mkdir(parents=True, exist_ok=True)
+        with path.open("x", encoding="utf-8", newline="\n") as handle:
+            handle.write(source)
+    except FileExistsError:
+        return _scaffold_result(template_id, capability, path, False, [f"Template already exists: {path}"])
+    except OSError as exc:
+        return _scaffold_result(template_id, capability, path, False, [f"Could not create template: {exc}"])
+    return _scaffold_result(template_id, capability, path, True, [])
+
+
+def format_template_scaffold(result: TemplateScaffoldResult) -> str:
+    lines = [
+        f"Template: {result['template_id']}",
+        f"Capability: {result['capability']}",
+        f"Path: {result['path']}",
+        f"Status: {'draft created' if result['success'] else 'failed'}",
+    ]
+    for error in result["errors"]:
+        lines.append(f"Error: {error}")
+    return "\n".join(lines)
+
+
+def _template_scaffold_source(template_id: str, capability: str) -> str:
+    return f'''"""Draft Visual Forge template for {capability}."""
+
+from __future__ import annotations
+
+
+TEMPLATE_ID = "{template_id}"
+TEMPLATE_VERSION = "1.0.0"
+TEMPLATE_STATUS = "draft"
+OUTPUT_TYPE = "png"
+
+
+def metadata() -> dict[str, object]:
+    return {{
+        "name": "{template_id.replace('_', ' ').title()}",
+        "description": "Draft template for {capability}.",
+        "capabilities": ["{capability}"],
+    }}
+
+
+def validate_params(params: dict[str, object]) -> list[str]:
+    _ = params
+    return []
+
+
+def required_assets(params: dict[str, object]) -> list[str]:
+    _ = params
+    return []
+
+
+def render(params: dict[str, object], output_path: str) -> None:
+    _ = params, output_path
+    raise NotImplementedError("Complete this template and set TEMPLATE_STATUS to ready.")
+'''
+
+
+def _scaffold_result(
+    template_id: str,
+    capability: str,
+    path: Path,
+    success: bool,
+    errors: list[str],
+) -> TemplateScaffoldResult:
+    return {
+        "template_id": template_id,
+        "capability": capability,
+        "path": str(path),
+        "success": success,
         "errors": errors,
     }
 

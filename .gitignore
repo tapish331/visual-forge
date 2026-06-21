@@ -33,6 +33,7 @@ models/
 # Local rotating logs and process locks
 logs/
 projects/*/.visual-forge.lock*
+assets/.visual-forge-assets.lock*
 
 # Visual Forge project media and caches
 projects/*/raw.mp4

@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from PIL import Image
+import pytest
+
+from app.assets import register_asset
 from app.artifacts import atomic_write_json, sha256_fingerprint, stat_fingerprint
 from app.project import JsonObject, ProjectState, build_initial_project, write_project
 from app.render_freshness import (
@@ -44,6 +48,45 @@ def test_preview_change_or_deletion_makes_chunk_render_stale(tmp_path: Path) -> 
         "reason": "upstream_stale",
     }
 
+
+def test_asset_change_makes_preview_chunk_final_and_verification_stale(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    project_dir, state, template_file, _, _ = prepared_complete_project(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    assets_dir = Path("assets")
+    asset_file = assets_dir / "images" / "paper.png"
+    asset_file.parent.mkdir(parents=True)
+    Image.new("RGB", (32, 32), "white").save(asset_file, format="PNG")
+    assert register_asset(asset_file, "paper_base", "1.0.0", assets_dir=assets_dir)["success"] is True
+    write_template(template_file, required_assets="['paper_base']")
+    provenance = build_preview_provenance(
+        project_dir,
+        state,
+        str(template_file),
+        Path("previews/preview_001.png"),
+        {"title": "Hello"},
+        assets_dir,
+    )
+    previews = state.get("previews")
+    assert previews is not None
+    previews[0].update(provenance)
+    render_metadata(state)["preview_fingerprints"] = {"preview_001": provenance["artifact_fingerprint"]}
+    write_project(project_dir / "project.json", state)
+    assert build_chunk_render_freshness(project_dir, state, "chunk_001", assets_dir)["state"] == "current"
+
+    Image.new("RGB", (32, 32), "black").save(asset_file, format="PNG")
+
+    assert build_chunk_render_freshness(project_dir, state, "chunk_001", assets_dir) == {
+        "state": "stale",
+        "reason": "upstream_stale",
+    }
+    summary = build_status(project_dir)
+    assert summary["state"] == "in_progress"
+    assert summary["outputs"]["final"].get("current") is False
+    assert summary["verification"]["final"]["current"] is False
+    assert state["failures"] == []
 
 def test_visual_plan_change_makes_chunk_render_stale(tmp_path: Path) -> None:
     project_dir, state, _, _, _ = prepared_complete_project(tmp_path)
@@ -313,7 +356,7 @@ def digest(fingerprint: JsonObject) -> str:
     return value
 
 
-def write_template(path: Path) -> None:
+def write_template(path: Path, *, required_assets: str = "[]") -> None:
     path.write_text(
         "\n".join(
             [
@@ -322,7 +365,7 @@ def write_template(path: Path) -> None:
                 "OUTPUT_TYPE = 'png'",
                 "def metadata(): return {}",
                 "def validate_params(params): return []",
-                "def required_assets(params): return []",
+                f"def required_assets(params): return {required_assets}",
                 "def render(params, output_path): pass",
             ]
         )

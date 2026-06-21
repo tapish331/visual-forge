@@ -370,7 +370,7 @@ def _record_preview_success_without_write(
     previews = _ensure_previews(data)
     existing_index = _find_record_index(previews, preview_id)
     existing_created_at = _created_at_for(previews, existing_index, created_or_updated_at)
-    provenance = build_preview_provenance(project_dir, data, template_ref, relative_output)
+    provenance = build_preview_provenance(project_dir, data, template_ref, relative_output, params)
     record: JsonObject = {
         "id": preview_id,
         "template_ref": template_ref,

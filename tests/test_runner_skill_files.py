@@ -26,6 +26,7 @@ def test_runner_skill_has_valid_frontmatter_and_references() -> None:
         "references/rendering-rules.md",
         "references/failure-recovery.md",
         "references/template-contract.md",
+        "references/capability-generation.md",
     }
     for reference in references:
         assert (SKILL_DIR / reference).is_file()
@@ -54,11 +55,16 @@ def test_runner_skill_documents_codex_intent_planning() -> None:
     skill_text = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
     workflow_text = (SKILL_DIR / "references" / "project-workflow.md").read_text(encoding="utf-8")
     visual_text = (SKILL_DIR / "references" / "visual-planning.md").read_text(encoding="utf-8")
+    capability_text = (SKILL_DIR / "references" / "capability-generation.md").read_text(encoding="utf-8")
 
-    assert "capability gap is recorded" in skill_text
+    assert "capability-generation.md" in skill_text
     assert "planning-context" in workflow_text
     assert "apply-visual-plan" in workflow_text
     assert "python -m app.main planning-context <project_dir> --chunk <chunk_id> --json" in visual_text
     assert "python -m app.main apply-visual-plan <project_dir> --chunk <chunk_id>" in visual_text
     assert "python -m app.main plan-visuals <project_dir> --chunk <chunk_id> --json" in visual_text
     assert "Do not substitute `simple_card` merely because it exists" in visual_text
+    assert "scaffold-template" in capability_text
+    assert "register-asset" in capability_text
+    assert "bind-visual-intent" in capability_text
+    assert "do not use paid or network generation services" in capability_text

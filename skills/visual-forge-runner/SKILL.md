@@ -36,9 +36,10 @@ Read only the reference needed for the current task:
 - Correct mistakes or rerun stale work: `references/correction-workflow.md`
 - Render chunks, compose final, or verify output: `references/rendering-rules.md`
 - Inspect or resolve failures: `references/failure-recovery.md`
-- Validate or create reusable templates: `references/template-contract.md`
+- Validate reusable templates: `references/template-contract.md`
+- Materialize a capability gap with local templates and assets: `references/capability-generation.md`
 
-Stop for human input when `next --json` reports `human_input_required: true`, when a capability gap is recorded, when visual choices need human judgment, or when a command returns active failures.
+Stop for human input when `next --json` reports `human_input_required: true` and the requested work does not authorize capability creation, when visual choices need human judgment, or when a command returns active failures. When the human asks to resolve a capability gap, follow `capability-generation.md`.
 
 ## Command Discipline
 

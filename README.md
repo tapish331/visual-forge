@@ -1,6 +1,6 @@
 # Visual Forge
 
-Visual Forge is a Codex-assisted, Python-powered production system for YouTube explainer videos. It is designed to turn a plain or timestamp/speaker-annotated script and a raw narration video into a finished video with well-timed visuals, reusable visual capabilities, and a growing asset library.
+Visual Forge is a Codex-assisted, Python-powered production system for YouTube explainer videos. It turns a plain or timestamp/speaker-annotated script and a raw narration video into a finished video with well-timed visuals, reusable visual capabilities, and a registered local asset library.
 
 ## What This Project Is
 
@@ -59,9 +59,9 @@ $project = "projects/my-video"
 & $py -m app.main create-chunks $project --json
 & $py -m app.main chunks $project
 # Repeat visual planning, preview, and rendering for every chunk.
-& $py -m app.main planning-context $project --chunk chunk_001 --json
-# The runner uses this compact context to author and apply a visual intent plan.
-# & $py -m app.main apply-visual-plan $project --chunk chunk_001 --plan-json $planJson --json
+# Prefer visual-forge-runner for Codex-authored intents. This deterministic
+# fallback keeps the shell example executable without constructing plan JSON.
+& $py -m app.main plan-visuals $project --chunk chunk_001 --json
 & $py -m app.main visuals $project --chunk chunk_001
 & $py -m app.main preview $project --chunk chunk_001 --json
 & $py -m app.main render-chunk $project chunk_001 --json
@@ -70,7 +70,7 @@ $project = "projects/my-video"
 & $py -m app.main status $project --json
 ```
 
-The expected state after successful final verification is `complete`. Codex-authored visual intents, deterministic fallback planning, manual visual correction, chunk rendering, final composition, and mechanical final verification are implemented. Template and asset generation are still planned.
+The expected state after successful final verification is `complete`. Codex-authored visual intents, deterministic fallback planning, manual visual correction, local template/asset materialization, chunk rendering, final composition, and mechanical final verification are implemented.
 
 `complete` means the rendered chunks cover the full canonical raw-video timeline without gaps or overlaps, all provenance is current, and final mechanical verification passed. It does not replace subjective human review.
 
@@ -139,8 +139,8 @@ The deterministic pipeline through final verification exists today. Later rows d
 | 8a | Recommend next checkpoint | Implemented | Ask what should happen next. | Use compact state to choose the next deterministic command or stop for human input. | `app/next_step.py` |
 | 9 | Plan visuals per chunk | Partial | Give feedback if visual choices feel wrong. | Author template-independent intents from compact context; heuristic and manual planning remain available. | `app/visual_intents.py`, `app/visual_planner.py`, `app/visuals.py` |
 | 10 | Inspect template inventory | Implemented | No action. | Check whether required visual capabilities already exist. | `app/templates.py` |
-| 11 | Create missing template | Partial | Review generated output later. | Template creation remains manual Codex work with no creation CLI; Python validates and renders it. | `app/templates.py` |
-| 12 | Create missing base asset | Planned | Review generated output later. | Create the reusable base asset. | `app/assets.py` |
+| 11 | Create missing template | Implemented | Review generated output. | Scaffold the exact missing capability, implement template-owned style, validate, and smoke-render it. | `app/templates.py` |
+| 12 | Create missing base asset | Implemented | Review generated output. | Create an offline/local PNG, then register, validate, and fingerprint it. | `app/assets.py` |
 | 13 | Write render items | Planned | No action. | Convert visual plans into exact render instructions. | `app/render_plan.py` |
 | 14 | Render preview | Implemented | Inspect one PNG visual or chunk storyboard. | Render one template, planned visual, or chunk visual storyboard; video and PNG-sequence previews remain planned. | `app/preview.py` |
 | 15 | Apply corrections | Partial | Tell the runner what is wrong. | Visual-plan correction exists; other correction workflows are planned. | `app/visuals.py` |
@@ -160,14 +160,14 @@ visual-forge/
   app/        Python CLI and deterministic pipeline code
   skills/     Runner skill plus focused reference docs
   templates/  Reusable visual generator scripts
-  assets/     Planned reusable base assets such as frames, textures, logos, and fonts
+  assets/     Registered reusable local PNG assets and their manifest
   library/    Planned reusable generated material and indexed visual capabilities
   inputs/     One source-material folder per YouTube video
   projects/   One checkpoint/control folder per YouTube video
   outputs/    One generated-artifact folder per YouTube video
 ```
 
-The repository has an implemented deterministic production foundation and Runner Skill V0. Reusable asset management, automatic template creation, and several planned folders remain future work.
+The repository has an implemented deterministic production foundation, Runner Skill V0, and a local capability-materialization workflow. Render-plan normalization, caching, richer asset types, and several planned folders remain future work.
 
 ## Per-Video Projects
 
@@ -209,7 +209,7 @@ Meaning:
 - `inputs/<slug>/raw.mp4` is the full camera recording.
 - `projects/<slug>/project.json` is the single workflow state file.
 - `outputs/<slug>/audio/`, `transcripts/`, `alignment/`, `previews/`, `chunk-previews/`, and `renders/` contain deterministic generated artifacts.
-- `outputs/<slug>/final.mp4` is the planned finished output.
+- `outputs/<slug>/final.mp4` is the composed finished output.
 
 Project folders store compact state; output folders store generated media and derived artifacts. Legacy projects without layout metadata still read and write generated artifacts under their project folder, but new projects should use the three-root layout.
 
@@ -241,7 +241,7 @@ python -m app.main adopt-layout projects/my-video --input-dir inputs/my-video
 
 This moves existing generated artifact directories into `outputs/<slug>/` only when the destination is empty. It does not rename raw input folders or change visual, chunk, or failure IDs.
 
-`project.json` contains alignment data, chunks, visual plans, previews, render metadata, verification metadata, failures, and human-requested corrections. A future render-plan and cache layer may normalize and optimize rendering, but the current renderer intentionally consumes visual and preview records directly.
+`project.json` contains compact alignment metadata, chunks, visual plans, previews, render metadata, verification metadata, failures, and human-requested corrections. The complete alignment artifact remains under `alignment/`. A future render-plan and cache layer may normalize and optimize rendering, but the current renderer intentionally consumes visual and preview records directly.
 
 The canonical V1 timeline preserves the full probed raw video from `0` through its duration. Trimming is not implicit; a future explicit trim feature may intentionally change those bounds.
 
@@ -331,7 +331,10 @@ Runner Skill V0 is implemented as repo-local skill source:
 ```text
 skills/visual-forge-runner/
   SKILL.md
+  agents/
+    openai.yaml
   references/
+    capability-generation.md
     project-workflow.md
     visual-planning.md
     template-contract.md
@@ -426,8 +429,14 @@ python -m app.main planning-context projects/my-video --chunk chunk_001 --json
 python -m app.main apply-visual-plan projects/my-video --chunk chunk_001 --plan-json $planJson --json
 python -m app.main visual-intents projects/my-video --chunk chunk_001 --json
 python -m app.main visual-intents projects/my-video --chunk chunk_001 --gaps-only --json
+python -m app.main bind-visual-intent projects/my-video intent_abc123 --template newspaper_headline --params-json $paramsJson --json
 python -m app.main templates
 python -m app.main templates --json
+python -m app.main scaffold-template timeline_map --capability timeline_map --json
+python -m app.main assets
+python -m app.main assets --json
+python -m app.main register-asset assets/images/newspaper_base.png --id newspaper_base --version 1.0.0 --json
+python -m app.main validate-asset newspaper_base --json
 python -m app.main validate-template templates/simple_card.py
 python -m app.main validate-template templates/simple_card.py --json
 python -m app.main render-template simple_card outputs/simple_card.png --params-json "{\"title\":\"Hello\"}"
@@ -501,11 +510,15 @@ Each template must declare:
 - `required_assets(params)`
 - `render(params, output_path)`
 
+Templates may also declare `TEMPLATE_STATUS`; it defaults to `ready` for backward compatibility.
+
 Template inventory, validation, contract-level template rendering, and PNG project preview are implemented. `simple_card` can render a deterministic `1920x1080` PNG. Chunk rendering, final composition, and final verification are implemented. Video and PNG-sequence template previews remain planned.
 
 Template metadata may advertise lowercase snake-case capability IDs such as `key_point`, `quote`, or `newspaper_headline`. Visual intents use exact capability matching to find candidate templates. Missing capability metadata remains backward compatible but prevents automatic matching.
 
-`required_assets(params)` is declared and contract-validated, but returned asset paths are not yet resolved, hashed, or enforced. Asset inventory and provenance belong to the planned Template And Asset Generation milestone.
+`required_assets(params)` returns registered asset IDs. Binding, direct rendering, and preview rendering reject missing or stale assets. Preview provenance records asset fingerprints so asset changes invalidate affected chunk renders, final composition, and verification.
+
+Templates may declare `TEMPLATE_STATUS = "draft"` or `"ready"`. Existing templates default to `ready`; `scaffold-template` creates a contract-valid draft that cannot be matched, bound, or rendered until Codex completes it and marks it ready.
 
 Templates choose their own visual style. There is no central art-direction system in V1 because each visual type may need a different treatment. Global rules should only cover mechanical constraints such as resolution, duration, safe margins, and output encoding.
 
@@ -609,7 +622,7 @@ VISUAL_FORGE_FFPROBE=C:\ffmpeg\bin\ffprobe.exe
 
 ## Example Visual Capability
 
-Suppose a video needs a newspaper headline visual.
+The repository includes a newspaper headline visual capability:
 
 The runner should check whether the project already has:
 
@@ -618,7 +631,7 @@ templates/newspaper_headline.py
 assets/images/newspaper_base.png
 ```
 
-If not, Codex should create the missing reusable template and the missing base newspaper asset. After that, Python can animate the result deterministically:
+It was created through the same gap-materialization workflow used for future capabilities. Python validates and combines it deterministically:
 
 ```text
 blank newspaper base asset
@@ -654,7 +667,7 @@ Old project inputs and outputs should not need to be removed during normal use. 
 
 ## Current Status
 
-Visual Forge currently has a tested project-control, media-ingestion, alignment, chunking, Codex intent-planning, deterministic fallback planning, template-preview, chunk-rendering, final-composition, final-verification, and runner-skill foundation. Template and asset generation remain scaffolds.
+Visual Forge currently has a tested project-control, media-ingestion, alignment, chunking, Codex intent-planning, local template/asset materialization, deterministic fallback planning, template-preview, chunk-rendering, final-composition, final-verification, and runner-skill foundation.
 
 What exists today:
 
@@ -663,6 +676,7 @@ pyproject.toml
 app/__init__.py
 app/align.py
 app/artifacts.py
+app/assets.py
 app/audio.py
 app/chunks.py
 app/compose.py
@@ -689,6 +703,7 @@ app/visuals.py
 app/verify.py
 skills/visual-forge-runner/SKILL.md
 skills/visual-forge-runner/agents/openai.yaml
+skills/visual-forge-runner/references/capability-generation.md
 skills/visual-forge-runner/references/correction-workflow.md
 skills/visual-forge-runner/references/failure-recovery.md
 skills/visual-forge-runner/references/project-workflow.md
@@ -696,10 +711,13 @@ skills/visual-forge-runner/references/rendering-rules.md
 skills/visual-forge-runner/references/template-contract.md
 skills/visual-forge-runner/references/visual-planning.md
 templates/__init__.py
+templates/newspaper_headline.py
 templates/simple_card.py
+assets/manifest.json
+assets/images/newspaper_base.png
 ```
 
-Project initialization with canonical or external input references, three-root slug-based layout metadata, legacy layout adoption, atomic checkpoint writes, hybrid artifact fingerprints, stale dependency detection, status reporting, read-only next-step recommendation, raw media probing with `ffprobe`, narration audio extraction with FFmpeg, offline narration transcription through `faster-whisper` or deterministic mock providers, metadata-aware alignment with compact review, full-timeline contiguous chunk creation, camera-only chunk approval, active/resolved failure management, process-safe bounded logging, project mutation locks, template contract validation, template capability inventory, one deterministic template render path, PNG project preview, Codex-authored visual intents, capability-gap detection, deterministic fallback planning, project-level and chunk-scoped visual items, preview-by-visual-ID, chunk storyboard preview, render dependency fingerprinting, exact-duration chunk MP4 rendering, final composition, final verification, visual correction through `update-visual`, and Runner Skill V0 are implemented. Template generation, asset management, caching, video/sequence templates, and most later flow scripts are not implemented yet.
+Project initialization with canonical or external input references, three-root slug-based layout metadata, legacy layout adoption, atomic checkpoint writes, hybrid artifact fingerprints, stale dependency detection, status reporting, read-only next-step recommendation, raw media probing with `ffprobe`, narration audio extraction with FFmpeg, offline narration transcription through `faster-whisper` or deterministic mock providers, metadata-aware alignment with compact review, full-timeline contiguous chunk creation, camera-only chunk approval, active/resolved failure management, process-safe bounded logging, project mutation locks, template contract validation, template capability inventory, draft scaffolding, registered local PNG assets, required-asset enforcement, targeted intent binding, deterministic template rendering, PNG project preview, Codex-authored visual intents, capability-gap detection, deterministic fallback planning, project-level and chunk-scoped visual items, preview-by-visual-ID, chunk storyboard preview, render dependency fingerprinting, exact-duration chunk MP4 rendering, final composition, final verification, visual correction through `update-visual`, and Runner Skill V0 are implemented. Render-plan normalization, cache optimization, additional asset types, video/sequence templates, and most later flow scripts are not implemented yet.
 
 ## Implemented Foundation
 
@@ -710,7 +728,7 @@ The first useful milestone is the project-control and template-contract foundati
 3. Adopt the three-root layout for existing legacy projects without changing IDs.
 4. Create and validate `project.json`.
 5. Report human-readable project status.
-6. Report compact JSON status for future runner skill use.
+6. Report compact JSON status for runner skill use.
 7. Keep raw/final media ignored while allowing `script.txt` and `project.json` to remain trackable.
 8. Validate the V1 template contract.
 9. List template inventory in human-readable and compact JSON formats.
@@ -743,7 +761,11 @@ The first useful milestone is the project-control and template-contract foundati
 36. Provide a repo-local `visual-forge-runner` skill with focused workflow references.
 37. Plan starter visuals for one chunk with deterministic `plan-visuals` using existing templates only.
 38. Persist template-independent Codex visual intents, match template capabilities, and record explicit capability gaps.
+39. Scaffold non-bindable draft templates for concrete capability gaps.
+40. Register, validate, fingerprint, and enforce reusable local PNG assets.
+41. Bind one existing visual intent without replacing unrelated project planning.
+42. Provide the asset-backed `newspaper_headline` capability and runner materialization workflow.
 
-The next slice should implement template and asset generation so the runner can create new visual capabilities when existing templates are insufficient.
+The next slice should normalize executable render plans and add content-addressed caching so unchanged previews and chunk outputs can be reused safely.
 
-The goal is to expand from deterministic operation into creative planning, reusable asset generation, and richer template capabilities.
+The goal is to reduce unnecessary rendering while keeping dependency provenance and human-visible project state explicit.

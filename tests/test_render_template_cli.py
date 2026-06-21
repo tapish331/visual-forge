@@ -6,6 +6,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+from PIL import Image
+
+from app.assets import register_asset
+from app.render_template import render_template
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
@@ -93,6 +98,60 @@ def test_render_template_creates_output_parent_directory(tmp_path: Path) -> None
 
     assert result.returncode == 0, result.stderr
     assert output_file.exists()
+
+
+def test_newspaper_template_renders_registered_asset_backed_png(tmp_path: Path) -> None:
+    output_file = tmp_path / "newspaper.png"
+
+    result = run_cli(
+        "render-template",
+        "newspaper_headline",
+        output_file,
+        "--params-json",
+        '{"headline":"A New Capability","publication":"Visual Forge"}',
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    summary = json.loads(result.stdout)
+    assert summary["required_assets"] == ["newspaper_base"]
+    assert "newspaper_base" in summary["asset_fingerprints"]
+    assert read_png_size(output_file) == (1920, 1080)
+
+
+def test_required_asset_is_enforced_before_existing_output_is_replaced(tmp_path: Path) -> None:
+    templates_dir = tmp_path / "templates"
+    assets_dir = tmp_path / "assets"
+    templates_dir.mkdir()
+    template_file = templates_dir / "asset_template.py"
+    template_file.write_text(
+        "\n".join(
+            [
+                'TEMPLATE_ID = "asset_template"',
+                'TEMPLATE_VERSION = "1.0.0"',
+                'OUTPUT_TYPE = "png"',
+                'def metadata(): return {"capabilities": ["asset_test"]}',
+                'def validate_params(params): return []',
+                'def required_assets(params): return ["test_asset"]',
+                'def render(params, output_path): open(output_path, "wb").write(b"new")',
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    asset_file = assets_dir / "images" / "test.png"
+    asset_file.parent.mkdir(parents=True)
+    Image.new("RGB", (10, 10), "white").save(asset_file, format="PNG")
+    assert register_asset(asset_file, "test_asset", "1.0.0", assets_dir=assets_dir)["success"] is True
+    output = tmp_path / "output.png"
+    output.write_bytes(b"previous")
+    asset_file.unlink()
+
+    result = render_template("asset_template", output, {}, templates_dir, assets_dir)
+
+    assert result["success"] is False
+    assert output.read_bytes() == b"previous"
+    assert "missing" in "; ".join(result["errors"]).lower()
 
 
 def read_png_size(path: Path) -> tuple[int, int]:

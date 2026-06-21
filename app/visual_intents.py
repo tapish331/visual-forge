@@ -15,7 +15,7 @@ from .failures import record_failure, resolve_matching_failures
 from .layout import artifact_path
 from .project import JsonObject, JsonValue, ProjectError, ProjectState, load_project, project_file_for
 from .project import utc_now_iso, write_project
-from .render_template import resolve_template_file, validate_template_params
+from .render_template import parse_params_json, resolve_template_file, validate_template_params
 from .templates import TemplateInfo, build_inventory, validate_template_file
 from .timeline import build_timeline_chunk_freshness
 from .visuals import build_visual_id, find_chunk, format_seconds, validate_chunk_reference, validate_time_range
@@ -23,8 +23,12 @@ from .visuals import build_visual_id, find_chunk, format_seconds, validate_chunk
 
 PLANNER_ID = "codex_v1"
 INTENT_STAGE = "visual_intent_plan"
+INTENT_BIND_STAGE = "visual_intent_bind"
 INTENT_RECOMMENDED_NEXT_ACTION = (
     "Fix the visual intent plan, chunk references, or template bindings, then rerun apply-visual-plan."
+)
+INTENT_BIND_RECOMMENDED_NEXT_ACTION = (
+    "Fix the template capability, params, or required assets, then rerun bind-visual-intent."
 )
 INTENT_TYPE_PATTERN = re.compile(r"^[a-z0-9]+(?:_[a-z0-9]+)*$")
 
@@ -63,6 +67,17 @@ class VisualIntentsSummary(TypedDict):
     total: int
     by_status: dict[str, int]
     intents: list[JsonObject]
+
+
+class BindVisualIntentResult(TypedDict):
+    project_dir: str
+    intent_id: str
+    chunk_id: str | None
+    template_ref: str
+    visual_id: str | None
+    success: bool
+    reused_existing: bool
+    errors: list[str]
 
 
 def build_planning_context(project_dir: Path, chunk_id: str) -> PlanningContextResult:
@@ -183,6 +198,85 @@ def build_visual_intents_summary(
     }
 
 
+def bind_visual_intent_from_json(
+    project_dir: Path,
+    intent_id: str,
+    template_ref: str,
+    params_json: str,
+) -> BindVisualIntentResult:
+    data = load_project(project_dir)
+    params, errors = parse_params_json(params_json)
+    errors.extend(_prerequisite_errors(project_dir, data))
+    intent_index = _intent_index(data, intent_id)
+    intent = data.get("visual_intents", [])[intent_index] if intent_index is not None else None
+    chunk_id = _string_field(intent, "chunk_id") if intent is not None else None
+    if intent is None:
+        errors.append(f"Visual intent not found: {intent_id}")
+    elif intent.get("planner") != PLANNER_ID:
+        errors.append(f"Visual intent is not owned by {PLANNER_ID}: {intent_id}")
+    chunk = find_chunk(data, chunk_id) if chunk_id is not None else None
+    if intent is not None and chunk is None:
+        errors.append(f"Visual intent references a missing chunk: {chunk_id or 'unknown'}")
+
+    visual: JsonObject | None = None
+    binding: JsonObject | None = None
+    if not errors and intent is not None and chunk_id is not None:
+        intent_type = _string_field(intent, "intent_type")
+        start = _number_field(intent, "start")
+        end = _number_field(intent, "end")
+        if intent_type is None or start is None or end is None:
+            errors.append(f"Visual intent record is malformed: {intent_id}")
+        else:
+            binding, visual, binding_errors = _build_binding(
+                {"template_ref": template_ref, "params": cast(JsonValue, params)},
+                intent_id=intent_id,
+                intent_type=intent_type,
+                chunk_id=chunk_id,
+                start=start,
+                end=end,
+                created_at=_created_at_map(_chunk_visuals(data, chunk_id)),
+                now=utc_now_iso(),
+            )
+            errors.extend(binding_errors)
+
+    if errors or intent is None or intent_index is None or chunk is None or chunk_id is None or visual is None or binding is None:
+        _record_bind_failure(project_dir, data, intent_id, chunk_id, template_ref, errors)
+        return _bind_result(project_dir, intent_id, chunk_id, template_ref, None, False, False, errors)
+
+    visual_id = _required_string(visual, "id")
+    existing_visual = _intent_visual(data, intent_id)
+    already_bound = (
+        intent.get("status") == "bound"
+        and intent.get("visual_id") == visual_id
+        and intent.get("binding") == binding
+        and existing_visual is not None
+        and _semantic_records([existing_visual]) == _semantic_records([visual])
+    )
+    if already_bound:
+        resolved = resolve_matching_failures(data, stage=INTENT_BIND_STAGE, scope=_intent_scope(intent_id))
+        if resolved:
+            data["project"]["updated_at"] = utc_now_iso()
+            write_project(project_file_for(project_dir), data)
+        return _bind_result(project_dir, intent_id, chunk_id, template_ref, visual_id, True, True, [])
+
+    now = utc_now_iso()
+    intent["binding"] = binding
+    intent["visual_id"] = visual_id
+    intent["status"] = "bound"
+    intent["candidate_template_ids"] = cast(JsonValue, _candidate_templates(_ready_template_infos(), _required_string(intent, "intent_type")))
+    intent["updated_at"] = now
+    data["visuals"] = [
+        item
+        for item in data.get("visuals", [])
+        if not (item.get("planner") == PLANNER_ID and item.get("intent_id") == intent_id)
+    ] + [visual]
+    _update_chunk_planning(chunk, _chunk_intents(data, chunk_id), now)
+    resolve_matching_failures(data, stage=INTENT_BIND_STAGE, scope=_intent_scope(intent_id))
+    data["project"]["updated_at"] = now
+    write_project(project_file_for(project_dir), data)
+    return _bind_result(project_dir, intent_id, chunk_id, template_ref, visual_id, True, False, [])
+
+
 def format_planning_context(result: PlanningContextResult) -> str:
     lines = [
         f"Chunk: {result['chunk_id']}",
@@ -226,6 +320,22 @@ def format_visual_intents_summary(summary: VisualIntentsSummary) -> str:
     return "\n".join(lines)
 
 
+def format_bind_visual_intent_result(result: BindVisualIntentResult) -> str:
+    lines = [
+        f"Intent: {result['intent_id']}",
+        f"Chunk: {result['chunk_id'] or 'unknown'}",
+        f"Template: {result['template_ref']}",
+        f"Status: {'bound' if result['success'] else 'failed'}",
+    ]
+    if result["visual_id"] is not None:
+        lines.append(f"Visual: {result['visual_id']}")
+    if result["reused_existing"]:
+        lines.append("Reused existing binding: yes")
+    for error in result["errors"]:
+        lines.append(f"Error: {error}")
+    return "\n".join(lines)
+
+
 def build_intent_id(
     chunk_id: str,
     intent_type: str,
@@ -258,7 +368,7 @@ def _build_plan_records(
     allowed_set = set(allowed_block_ids)
     block_order = {block_id: index for index, block_id in enumerate(allowed_block_ids)}
     inventory = build_inventory()
-    template_infos = [item for item in inventory["templates"] if item["valid"]]
+    template_infos = [item for item in inventory["templates"] if item["ready"]]
     existing_intent_created = _created_at_map(existing_intents)
     existing_visual_created = _created_at_map(existing_visuals)
     now = utc_now_iso()
@@ -461,7 +571,7 @@ def _context_blocks(chunk: JsonObject, artifact: JsonObject) -> tuple[list[JsonO
 def _template_context() -> list[JsonObject]:
     output: list[JsonObject] = []
     for info in build_inventory()["templates"]:
-        if not info["valid"]:
+        if not info["ready"]:
             continue
         description = info["metadata"].get("description")
         output.append(
@@ -483,6 +593,10 @@ def _candidate_templates(infos: list[TemplateInfo], intent_type: str) -> list[st
         and (template_id := info["template_id"]) is not None
     ]
     return sorted(candidates)
+
+
+def _ready_template_infos() -> list[TemplateInfo]:
+    return [item for item in build_inventory()["templates"] if item["ready"]]
 
 
 def _planning_summary(data: ProjectState, chunk_id: str, chunk: JsonObject | None) -> JsonObject:
@@ -633,6 +747,26 @@ def _record_intent_failure(project_dir: Path, data: ProjectState, chunk_id: str,
     write_project(project_file_for(project_dir), data)
 
 
+def _record_bind_failure(
+    project_dir: Path,
+    data: ProjectState,
+    intent_id: str,
+    chunk_id: str | None,
+    template_ref: str,
+    errors: list[str],
+) -> None:
+    record_failure(
+        data,
+        stage=INTENT_BIND_STAGE,
+        scope=_intent_scope(intent_id),
+        errors=errors or ["Visual intent binding could not be completed."],
+        recommended_next_action=INTENT_BIND_RECOMMENDED_NEXT_ACTION,
+        context={"intent_id": intent_id, "chunk_id": chunk_id, "template_ref": template_ref},
+    )
+    data["project"]["updated_at"] = utc_now_iso()
+    write_project(project_file_for(project_dir), data)
+
+
 def _apply_result(
     project_dir: Path,
     chunk_id: str,
@@ -660,6 +794,24 @@ def _apply_result(
 
 def _chunk_intents(data: ProjectState, chunk_id: str) -> list[JsonObject]:
     return [intent for intent in data.get("visual_intents", []) if intent.get("chunk_id") == chunk_id]
+
+
+def _intent_index(data: ProjectState, intent_id: str) -> int | None:
+    return next(
+        (index for index, intent in enumerate(data.get("visual_intents", [])) if intent.get("id") == intent_id),
+        None,
+    )
+
+
+def _intent_visual(data: ProjectState, intent_id: str) -> JsonObject | None:
+    return next(
+        (
+            visual
+            for visual in data.get("visuals", [])
+            if visual.get("planner") == PLANNER_ID and visual.get("intent_id") == intent_id
+        ),
+        None,
+    )
 
 
 def _chunk_visuals(data: ProjectState, chunk_id: str) -> list[JsonObject]:
@@ -734,3 +886,29 @@ def _number_field(data: JsonObject, key: str) -> float | None:
 
 def _chunk_scope(chunk_id: str) -> str:
     return f"chunk:{chunk_id}"
+
+
+def _intent_scope(intent_id: str) -> str:
+    return f"intent:{intent_id}"
+
+
+def _bind_result(
+    project_dir: Path,
+    intent_id: str,
+    chunk_id: str | None,
+    template_ref: str,
+    visual_id: str | None,
+    success: bool,
+    reused: bool,
+    errors: list[str],
+) -> BindVisualIntentResult:
+    return {
+        "project_dir": str(project_dir),
+        "intent_id": intent_id,
+        "chunk_id": chunk_id,
+        "template_ref": template_ref,
+        "visual_id": visual_id,
+        "success": success,
+        "reused_existing": reused,
+        "errors": errors,
+    }
