@@ -1,0 +1,4 @@
+interface:
+  display_name: "Visual Forge Runner"
+  short_description: "Operate the Visual Forge video pipeline"
+  default_prompt: "Use $visual-forge-runner to continue the next Visual Forge project checkpoint."

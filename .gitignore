@@ -24,6 +24,32 @@ dist/
 # Local environment files
 .env
 .env.*
+!.env.example
 
 # Generated visual outputs
 outputs/
+models/
+
+# Local rotating logs and process locks
+logs/
+projects/*/.visual-forge.lock*
+
+# Visual Forge project media and caches
+projects/*/raw.mp4
+projects/*/raw.mov
+projects/*/final.mp4
+projects/*/final.mov
+projects/*/audio/
+projects/*/cache/
+projects/*/generated/
+projects/*/renders/
+projects/*/previews/
+projects/*/chunk-previews/
+
+# Externally referenced source media (scripts and JSON remain trackable)
+inputs/**/*.mp4
+inputs/**/*.mov
+inputs/**/*.m4v
+inputs/**/*.mkv
+inputs/**/*.avi
+inputs/**/*.webm

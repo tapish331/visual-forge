@@ -1,0 +1,1 @@
+"""Visual Forge application package."""
