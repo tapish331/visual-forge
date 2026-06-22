@@ -75,6 +75,7 @@ from .visual_intents import (
     format_visual_intents_summary,
 )
 from .visual_planner import DEFAULT_MAX_VISUALS, format_plan_visuals_result, plan_visuals_for_chunk
+from .visual_quality import build_visual_plan_review, format_visual_plan_review
 from .visuals import add_visual_from_json, build_visuals_summary, format_add_visual_result
 from .visuals import format_update_visual_result, format_visuals_summary, update_visual_from_json
 
@@ -255,6 +256,15 @@ def build_parser() -> argparse.ArgumentParser:
     visual_intents_parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
     visual_intents_parser.set_defaults(handler=handle_visual_intents)
 
+    visual_plan_review_parser = subparsers.add_parser(
+        "visual-plan-review",
+        help="Review visual density, diversity, and animation quality for one chunk",
+    )
+    visual_plan_review_parser.add_argument("project_dir", type=Path)
+    visual_plan_review_parser.add_argument("--chunk", dest="chunk_id", required=True)
+    visual_plan_review_parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    visual_plan_review_parser.set_defaults(handler=handle_visual_plan_review)
+
     bind_visual_intent_parser = subparsers.add_parser(
         "bind-visual-intent",
         help="Bind one Codex visual intent to a ready template",
@@ -321,6 +331,11 @@ def build_parser() -> argparse.ArgumentParser:
     render_template_parser.add_argument("template_ref", help="Template ID or template Python file")
     render_template_parser.add_argument("output_path", type=Path)
     render_template_parser.add_argument("--params-json", required=True, help="Template params as a JSON object")
+    render_template_parser.add_argument(
+        "--duration-seconds",
+        type=float,
+        help="Duration for mp4 template smoke renders",
+    )
     render_template_parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
     render_template_parser.set_defaults(handler=handle_render_template)
 
@@ -606,6 +621,15 @@ def handle_visual_intents(args: argparse.Namespace) -> int:
     return 0
 
 
+def handle_visual_plan_review(args: argparse.Namespace) -> int:
+    summary = build_visual_plan_review(args.project_dir, args.chunk_id)
+    if args.json:
+        print(json.dumps(summary, separators=(",", ":")))
+    else:
+        print(format_visual_plan_review(summary))
+    return 0 if summary["passed"] else 1
+
+
 def handle_bind_visual_intent(args: argparse.Namespace) -> int:
     result = bind_visual_intent_from_json(args.project_dir, args.intent_id, args.template, args.params_json)
     if args.json:
@@ -702,7 +726,12 @@ def handle_validate_template(args: argparse.Namespace) -> int:
 
 
 def handle_render_template(args: argparse.Namespace) -> int:
-    result = render_template_from_json(args.template_ref, args.output_path, args.params_json)
+    result = render_template_from_json(
+        args.template_ref,
+        args.output_path,
+        args.params_json,
+        duration_seconds=cast(float | None, args.duration_seconds),
+    )
     if args.json:
         print(json.dumps(result, separators=(",", ":")))
     else:

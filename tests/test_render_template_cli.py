@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import struct
 import subprocess
 import sys
@@ -16,12 +17,16 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
 
-def run_cli(*args: str | Path) -> subprocess.CompletedProcess[str]:
+def run_cli(*args: str | Path, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+    command_env = os.environ.copy()
+    if env is not None:
+        command_env.update(env)
     return subprocess.run(
         [sys.executable, "-m", "app.main", *(str(arg) for arg in args)],
         cwd=REPO_ROOT,
         text=True,
         capture_output=True,
+        env=command_env,
     )
 
 
@@ -119,6 +124,47 @@ def test_newspaper_template_renders_registered_asset_backed_png(tmp_path: Path) 
     assert read_png_size(output_file) == (1920, 1080)
 
 
+def test_render_template_mp4_requires_duration(tmp_path: Path) -> None:
+    output_file = tmp_path / "animated.mp4"
+
+    result = run_cli(
+        "render-template",
+        "animated_opening_hook",
+        output_file,
+        "--params-json",
+        '{"title":"Animated"}',
+        "--json",
+    )
+
+    assert result.returncode == 1
+    summary = json.loads(result.stdout)
+    assert summary["output_type"] == "mp4"
+    assert "duration_seconds is required" in "; ".join(summary["errors"])
+    assert not output_file.exists()
+
+
+def test_render_template_mp4_creates_output_with_duration(tmp_path: Path) -> None:
+    output_file = tmp_path / "animated.mp4"
+    ffmpeg = fake_ffmpeg(tmp_path)
+
+    result = run_cli(
+        "render-template",
+        "animated_opening_hook",
+        output_file,
+        "--params-json",
+        '{"title":"Animated"}',
+        "--duration-seconds",
+        "1",
+        "--json",
+        env={"VISUAL_FORGE_FFMPEG": str(ffmpeg)},
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    summary = json.loads(result.stdout)
+    assert summary["output_type"] == "mp4"
+    assert output_file.read_bytes() == b"fake mp4 data"
+
+
 def test_required_asset_is_enforced_before_existing_output_is_replaced(tmp_path: Path) -> None:
     templates_dir = tmp_path / "templates"
     assets_dir = tmp_path / "assets"
@@ -163,3 +209,28 @@ def read_png_size(path: Path) -> tuple[int, int]:
     width = width_raw
     height = height_raw
     return width, height
+
+
+def fake_ffmpeg(tmp_path: Path) -> Path:
+    script = tmp_path / "fake_ffmpeg.py"
+    script.write_text(
+        "\n".join(
+            [
+                "from __future__ import annotations",
+                "import sys",
+                "from pathlib import Path",
+                "output = Path(sys.argv[-1])",
+                "output.parent.mkdir(parents=True, exist_ok=True)",
+                "output.write_bytes(b'fake mp4 data')",
+                "raise SystemExit(0)",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    if os.name == "nt":
+        wrapper = tmp_path / "fake_ffmpeg.cmd"
+        wrapper.write_text(f'@echo off\r\n"{sys.executable}" "{script}" %*\r\n', encoding="utf-8")
+        return wrapper
+    script.chmod(0o755)
+    return script

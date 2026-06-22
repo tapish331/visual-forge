@@ -26,6 +26,7 @@ Render one template directly:
 
 ```powershell
 python -m app.main render-template <template_id> <output_path> --params-json '<json>' --json
+python -m app.main render-template <mp4_template_id> <output_path.mp4> --params-json '<json>' --duration-seconds 6 --json
 ```
 
 ## Required Contract
@@ -66,6 +67,6 @@ png_sequence
 mp4
 ```
 
-V0 preview and chunk rendering are complete for PNG previews. Video and PNG-sequence template previews remain planned.
+PNG and MP4 template previews are implemented. MP4 templates require a duration for direct smoke renders; visual previews derive duration from `visual.end - visual.start`. PNG-sequence template previews remain planned.
 
 Each template owns its own visual style. Do not add a central art-direction system.

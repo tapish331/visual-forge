@@ -53,6 +53,7 @@ class ChunkVisualForRender(TypedDict):
     end: float
     relative_start: float
     relative_end: float
+    preview_output_type: str
     preview_output: str
     preview_path: Path
     preview_fingerprint: JsonObject
@@ -183,9 +184,10 @@ def _run_ffmpeg_render(
         str(raw_file),
     ]
     for visual in visuals:
-        command.extend(["-loop", "1"])
-        if frame_rate is not None and frame_rate > 0:
-            command.extend(["-framerate", _ffmpeg_seconds(frame_rate)])
+        if visual["preview_output_type"] == "png":
+            command.extend(["-loop", "1"])
+            if frame_rate is not None and frame_rate > 0:
+                command.extend(["-framerate", _ffmpeg_seconds(frame_rate)])
         command.extend(["-i", str(visual["preview_path"])])
     command.extend(
         [
@@ -268,10 +270,18 @@ def _filter_complex(visuals: list[ChunkVisualForRender], duration: float) -> tup
     for index, visual in enumerate(visuals, start=1):
         overlay_label = f"[ov{index}]"
         next_label = f"[v{index}]"
-        parts.append(
-            f"[{index}:v]setpts=PTS-STARTPTS,format=rgba,scale={OUTPUT_WIDTH}:{OUTPUT_HEIGHT}:"
-            f"force_original_aspect_ratio=decrease{overlay_label}"
-        )
+        if visual["preview_output_type"] == "mp4":
+            visual_duration = max(0.0, visual["relative_end"] - visual["relative_start"])
+            parts.append(
+                f"[{index}:v]trim=duration={_ffmpeg_seconds(visual_duration)},"
+                f"setpts=PTS-STARTPTS,format=rgba,scale={OUTPUT_WIDTH}:{OUTPUT_HEIGHT}:"
+                f"force_original_aspect_ratio=decrease{overlay_label}"
+            )
+        else:
+            parts.append(
+                f"[{index}:v]setpts=PTS-STARTPTS,format=rgba,scale={OUTPUT_WIDTH}:{OUTPUT_HEIGHT}:"
+                f"force_original_aspect_ratio=decrease{overlay_label}"
+            )
         parts.append(
             f"{current_label}{overlay_label}overlay=(W-w)/2:(H-h)/2:"
             f"enable='between(t,{_ffmpeg_seconds(visual['relative_start'])},"
@@ -337,14 +347,15 @@ def _visuals_for_render(
             errors.append(f"Preview record not found for visual {visual_id}: {preview_id}")
             continue
         preview_output = _string_field(preview, "output")
+        preview_output_type = _preview_output_type(preview)
         if preview_output is None:
             errors.append(f"Preview record is missing output: {preview_id}")
             continue
-        if Path(preview_output).suffix.casefold() != ".png":
-            errors.append(f"Only PNG visual previews are supported in V0: {preview_output}")
+        if preview_output_type not in {"png", "mp4"}:
+            errors.append(f"Unsupported visual preview output type for {preview_id}: {preview_output_type}")
             continue
         preview_path = artifact_path(project_dir, data, preview_output)
-        preview_errors = _validate_preview_png(preview_path, preview_id)
+        preview_errors = _validate_preview_artifact(preview_path, preview_id, preview_output_type)
         if preview_errors:
             errors.extend(preview_errors)
             continue
@@ -368,6 +379,7 @@ def _visuals_for_render(
                 "end": end,
                 "relative_start": round(start - chunk_start, 3),
                 "relative_end": round(end - chunk_start, 3),
+                "preview_output_type": preview_output_type,
                 "preview_output": preview_output,
                 "preview_path": preview_path,
                 "preview_fingerprint": preview_fingerprint,
@@ -375,6 +387,19 @@ def _visuals_for_render(
         )
     visuals.sort(key=lambda item: (item["start"], item["end"], item["visual_id"]))
     return visuals, errors
+
+
+def _validate_preview_artifact(path: Path, preview_id: str, output_type: str) -> list[str]:
+    if output_type == "png":
+        return _validate_preview_png(path, preview_id)
+    if not path.is_file():
+        return [f"Missing preview MP4 for {preview_id}: {path}"]
+    try:
+        if path.stat().st_size == 0:
+            return [f"Preview MP4 is empty for {preview_id}: {path}"]
+    except OSError as exc:
+        return [f"Could not read preview MP4 for {preview_id}: {exc}"]
+    return []
 
 
 def _validate_preview_png(path: Path, preview_id: str) -> list[str]:
@@ -486,6 +511,17 @@ def _find_chunk(data: ProjectState, chunk_id: str) -> JsonObject | None:
         if chunk.get("id") == chunk_id:
             return chunk
     return None
+
+
+def _preview_output_type(preview: JsonObject) -> str:
+    explicit = _string_field(preview, "output_type")
+    if explicit is not None:
+        return explicit
+    output = _string_field(preview, "output")
+    suffix = Path(output).suffix.casefold() if output is not None else ""
+    if suffix == ".mp4":
+        return "mp4"
+    return "png"
 
 
 def _find_preview(data: ProjectState, preview_id: str) -> JsonObject | None:

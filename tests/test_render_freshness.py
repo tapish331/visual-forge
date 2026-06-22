@@ -67,7 +67,7 @@ def test_asset_change_makes_preview_chunk_final_and_verification_stale(
         str(template_file),
         Path("previews/preview_001.png"),
         {"title": "Hello"},
-        assets_dir,
+        assets_dir=assets_dir,
     )
     previews = state.get("previews")
     assert previews is not None

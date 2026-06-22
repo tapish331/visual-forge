@@ -10,6 +10,7 @@ from .project import JsonObject, JsonValue, ProjectState, load_project
 from .render_freshness import build_chunk_render_freshness_map
 from .status import StatusSummary, build_status
 from .timeline import chunk_visual_mode
+from .visual_quality import build_visual_plan_review
 
 
 ActionKind = Literal["command", "human", "none"]
@@ -87,6 +88,16 @@ def _in_progress_next(project_dir: Path, status: StatusSummary, data: ProjectSta
         visual_mode = chunk_visual_mode(chunk, data.get("visuals", []))
         if chunk_status == "new":
             if visual_mode == "visuals":
+                if _has_codex_intents(data, chunk_id):
+                    review = build_visual_plan_review(project_dir, chunk_id)
+                    if not review["passed"]:
+                        return _chunk_command(
+                            project_dir,
+                            status,
+                            chunk_id,
+                            "Improve the dense animated visual plan before preview.",
+                            _cli("planning-context", str(project_dir), "--chunk", chunk_id, "--json"),
+                        )
                 return _chunk_command(
                     project_dir,
                     status,
@@ -239,6 +250,13 @@ def _chunk_intent_statuses(data: ProjectState, chunk_id: str) -> dict[str, int]:
         status = _string_field(intent, "status") or "unknown"
         counts[status] = counts.get(status, 0) + 1
     return counts
+
+
+def _has_codex_intents(data: ProjectState, chunk_id: str) -> bool:
+    return any(
+        intent.get("chunk_id") == chunk_id and intent.get("planner") == "codex_v1"
+        for intent in data.get("visual_intents", [])
+    )
 
 
 def _chunk_gap_types(data: ProjectState, chunk_id: str) -> list[str]:

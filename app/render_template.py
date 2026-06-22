@@ -17,6 +17,7 @@ from .templates import validate_template_file
 class RenderTemplateResult(TypedDict):
     template_ref: str
     template_id: str | None
+    output_type: str | None
     output_path: str
     success: bool
     required_assets: list[str]
@@ -27,6 +28,7 @@ class RenderTemplateResult(TypedDict):
 class TemplateParamsValidationResult(TypedDict):
     template_ref: str
     template_id: str | None
+    output_type: str | None
     valid: bool
     required_assets: list[str]
     asset_fingerprints: dict[str, JsonObject]
@@ -42,12 +44,14 @@ def render_template_from_json(
     template_ref: str,
     output_path: Path,
     params_json: str,
+    *,
+    duration_seconds: float | None = None,
     templates_dir: Path = DEFAULT_TEMPLATES_DIR,
 ) -> RenderTemplateResult:
     params, errors = parse_params_json(params_json)
     if errors:
-        return _render_template_result(template_ref, None, output_path, False, [], {}, errors)
-    return render_template(template_ref, output_path, params, templates_dir)
+        return _render_template_result(template_ref, None, None, output_path, False, [], {}, errors)
+    return render_template(template_ref, output_path, params, templates_dir, duration_seconds=duration_seconds)
 
 
 def render_template(
@@ -56,25 +60,41 @@ def render_template(
     params: dict[str, object],
     templates_dir: Path = DEFAULT_TEMPLATES_DIR,
     assets_dir: Path = DEFAULT_ASSETS_DIR,
+    *,
+    duration_seconds: float | None = None,
 ) -> RenderTemplateResult:
     errors: list[str] = []
 
+    render_params = _params_with_duration(params, duration_seconds)
     validation = validate_template_params(template_ref, params, templates_dir, assets_dir)
     if not validation["valid"]:
         return _render_template_result(
             template_ref,
             validation["template_id"],
+            validation["output_type"],
             output_path,
             False,
             validation["required_assets"],
             validation["asset_fingerprints"],
             validation["errors"],
         )
+    if validation["output_type"] == "mp4" and duration_seconds is None:
+        return _render_template_result(
+            template_ref,
+            validation["template_id"],
+            validation["output_type"],
+            output_path,
+            False,
+            validation["required_assets"],
+            validation["asset_fingerprints"],
+            ["duration_seconds is required for mp4 templates"],
+        )
 
     template_file = resolve_template_file(template_ref, templates_dir)
     if template_file is None:
         return _render_template_result(
             template_ref,
+            None,
             None,
             output_path,
             False,
@@ -85,8 +105,18 @@ def render_template(
 
     template_info = validate_template_file(template_file)
     template_id = template_info["template_id"]
+    output_type = template_info["output_type"]
     if not template_info["valid"]:
-        return _render_template_result(template_ref, template_id, output_path, False, [], {}, template_info["errors"])
+        return _render_template_result(
+            template_ref,
+            template_id,
+            output_type,
+            output_path,
+            False,
+            [],
+            {},
+            template_info["errors"],
+        )
 
     try:
         module = import_template_module(template_file)
@@ -94,6 +124,7 @@ def render_template(
         return _render_template_result(
             template_ref,
             template_id,
+            output_type,
             output_path,
             False,
             validation["required_assets"],
@@ -104,12 +135,13 @@ def render_template(
     render = _read_render(module)
     try:
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        render(params, str(output_path))
+        render(render_params, str(output_path))
     except Exception as exc:  # noqa: BLE001 - template render failures are render result data.
         errors.append(f"render() raised {type(exc).__name__}: {exc}")
         return _render_template_result(
             template_ref,
             template_id,
+            output_type,
             output_path,
             False,
             validation["required_assets"],
@@ -127,6 +159,7 @@ def render_template(
     return _render_template_result(
         template_ref,
         template_id,
+        output_type,
         output_path,
         not errors,
         validation["required_assets"],
@@ -146,6 +179,7 @@ def validate_template_params(
         return _template_params_validation_result(
             template_ref,
             None,
+            None,
             False,
             [],
             {},
@@ -154,12 +188,22 @@ def validate_template_params(
 
     template_info = validate_template_file(template_file)
     template_id = template_info["template_id"]
+    output_type = template_info["output_type"]
     if not template_info["valid"]:
-        return _template_params_validation_result(template_ref, template_id, False, [], {}, template_info["errors"])
+        return _template_params_validation_result(
+            template_ref,
+            template_id,
+            output_type,
+            False,
+            [],
+            {},
+            template_info["errors"],
+        )
     if not template_info["ready"]:
         return _template_params_validation_result(
             template_ref,
             template_id,
+            output_type,
             False,
             [],
             {},
@@ -172,6 +216,7 @@ def validate_template_params(
         return _template_params_validation_result(
             template_ref,
             template_id,
+            output_type,
             False,
             [],
             {},
@@ -198,6 +243,7 @@ def validate_template_params(
     return _template_params_validation_result(
         template_ref,
         template_id,
+        output_type,
         not errors,
         required_assets,
         fingerprints,
@@ -245,6 +291,7 @@ def format_render_template_result(result: RenderTemplateResult) -> str:
     template = result["template_id"] or result["template_ref"]
     lines = [
         f"Template: {template}",
+        f"Output type: {result['output_type'] or 'unknown'}",
         f"Output: {result['output_path']}",
         f"Status: {status}",
     ]
@@ -268,6 +315,7 @@ def _read_required_assets(module: ModuleType) -> TemplateRequiredAssets:
 def _render_template_result(
     template_ref: str,
     template_id: str | None,
+    output_type: str | None,
     output_path: Path,
     success: bool,
     required_assets: list[str],
@@ -277,6 +325,7 @@ def _render_template_result(
     return {
         "template_ref": template_ref,
         "template_id": template_id,
+        "output_type": output_type,
         "output_path": str(output_path),
         "success": success,
         "required_assets": required_assets,
@@ -288,6 +337,7 @@ def _render_template_result(
 def _template_params_validation_result(
     template_ref: str,
     template_id: str | None,
+    output_type: str | None,
     valid: bool,
     required_assets: list[str],
     asset_fingerprints: dict[str, JsonObject],
@@ -296,8 +346,17 @@ def _template_params_validation_result(
     return {
         "template_ref": template_ref,
         "template_id": template_id,
+        "output_type": output_type,
         "valid": valid,
         "required_assets": required_assets,
         "asset_fingerprints": asset_fingerprints,
         "errors": errors,
     }
+
+
+def _params_with_duration(params: dict[str, object], duration_seconds: float | None) -> dict[str, object]:
+    if duration_seconds is None:
+        return dict(params)
+    output = dict(params)
+    output["duration_seconds"] = duration_seconds
+    return output

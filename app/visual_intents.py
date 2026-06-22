@@ -18,6 +18,7 @@ from .project import utc_now_iso, write_project
 from .render_template import parse_params_json, resolve_template_file, validate_template_params
 from .templates import TemplateInfo, build_inventory, validate_template_file
 from .timeline import build_timeline_chunk_freshness
+from .visual_quality import quality_policy, review_intent_records
 from .visuals import build_visual_id, find_chunk, format_seconds, validate_chunk_reference, validate_time_range
 
 
@@ -149,6 +150,15 @@ def apply_visual_plan_from_json(project_dir: Path, chunk_id: str, plan_json: str
             existing_visuals,
         )
         errors.extend(build_errors)
+    if not errors and chunk is not None:
+        review = review_intent_records(project_dir, chunk, planned_intents)
+        if not review["passed"]:
+            errors.extend(
+                f"quality: {check['message']}"
+                for check in review["checks"]
+                if check.get("passed") is not True and isinstance(check.get("message"), str)
+            )
+            errors.extend(f"quality: {error}" for error in review["errors"])
 
     if errors:
         result = _apply_result(project_dir, chunk_id, False, [], [], False, errors)
@@ -234,6 +244,8 @@ def bind_visual_intent_from_json(
                 chunk_id=chunk_id,
                 start=start,
                 end=end,
+                visual_role=_string_field(intent, "visual_role"),
+                motion=cast(JsonObject | None, intent.get("motion") if isinstance(intent.get("motion"), dict) else None),
                 created_at=_created_at_map(_chunk_visuals(data, chunk_id)),
                 now=utc_now_iso(),
             )
@@ -242,6 +254,26 @@ def bind_visual_intent_from_json(
     if errors or intent is None or intent_index is None or chunk is None or chunk_id is None or visual is None or binding is None:
         _record_bind_failure(project_dir, data, intent_id, chunk_id, template_ref, errors)
         return _bind_result(project_dir, intent_id, chunk_id, template_ref, None, False, False, errors)
+
+    candidate_intents: list[JsonObject] = []
+    for index, existing in enumerate(data.get("visual_intents", [])):
+        if index == intent_index:
+            updated_intent = dict(existing)
+            updated_intent["binding"] = binding
+            updated_intent["visual_id"] = _required_string(visual, "id")
+            updated_intent["status"] = "bound"
+            candidate_intents.append(cast(JsonObject, updated_intent))
+        elif existing.get("chunk_id") == chunk_id and existing.get("planner") == PLANNER_ID:
+            candidate_intents.append(existing)
+    review = review_intent_records(project_dir, chunk, candidate_intents)
+    if not review["passed"]:
+        quality_errors = [
+            f"quality: {check['message']}"
+            for check in review["checks"]
+            if check.get("passed") is not True and isinstance(check.get("message"), str)
+        ] + [f"quality: {error}" for error in review["errors"]]
+        _record_bind_failure(project_dir, data, intent_id, chunk_id, template_ref, quality_errors)
+        return _bind_result(project_dir, intent_id, chunk_id, template_ref, None, False, False, quality_errors)
 
     visual_id = _required_string(visual, "id")
     existing_visual = _intent_visual(data, intent_id)
@@ -343,6 +375,8 @@ def build_intent_id(
     content: JsonObject,
     style_notes: str | None,
     source_block_ids: list[str],
+    visual_role: str | None = None,
+    motion: JsonObject | None = None,
 ) -> str:
     payload: JsonObject = {
         "chunk_id": chunk_id,
@@ -352,6 +386,10 @@ def build_intent_id(
         "style_notes": style_notes,
         "source_block_ids": cast(JsonValue, source_block_ids),
     }
+    if visual_role is not None:
+        payload["visual_role"] = visual_role
+    if motion is not None:
+        payload["motion"] = motion
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
     return f"intent_{hashlib.sha256(encoded).hexdigest()[:12]}"
 
@@ -386,6 +424,9 @@ def _build_plan_records(
         source_ids = _input_string_list(raw, "source_block_ids", prefix, errors)
         content = _input_object(raw, "content", prefix, errors)
         style_notes = _optional_input_string(raw, "style_notes", prefix, errors)
+        visual_role = _optional_input_string(raw, "visual_role", prefix, errors)
+        motion_value = raw.get("motion")
+        motion = cast(JsonObject, motion_value) if isinstance(motion_value, dict) else None
         binding = raw.get("binding")
 
         if intent_type is not None and not INTENT_TYPE_PATTERN.fullmatch(intent_type):
@@ -412,7 +453,16 @@ def _build_plan_records(
             continue
 
         source_ids = sorted(set(source_ids), key=lambda item: block_order[item])
-        intent_id = build_intent_id(chunk_id, intent_type, purpose, content, style_notes, source_ids)
+        intent_id = build_intent_id(
+            chunk_id,
+            intent_type,
+            purpose,
+            content,
+            style_notes,
+            source_ids,
+            visual_role,
+            motion,
+        )
         if intent_id in seen_ids:
             errors.append(f"{prefix} duplicates intent {intent_id}")
             continue
@@ -430,6 +480,8 @@ def _build_plan_records(
                 chunk_id=chunk_id,
                 start=start,
                 end=end,
+                visual_role=visual_role,
+                motion=motion,
                 created_at=existing_visual_created,
                 now=now,
             )
@@ -449,6 +501,8 @@ def _build_plan_records(
             "purpose": purpose,
             "content": content,
             "style_notes": style_notes,
+            "visual_role": visual_role,
+            "motion": cast(JsonValue, motion),
             "status": status,
             "candidate_template_ids": cast(JsonValue, candidates),
             "binding": binding_record,
@@ -472,6 +526,8 @@ def _build_binding(
     chunk_id: str,
     start: float,
     end: float,
+    visual_role: str | None,
+    motion: JsonObject | None,
     created_at: dict[str, str],
     now: str,
 ) -> tuple[JsonObject | None, JsonObject | None, list[str]]:
@@ -516,6 +572,8 @@ def _build_binding(
         "chunk_id": chunk_id,
         "planner": PLANNER_ID,
         "intent_id": intent_id,
+        "visual_role": visual_role,
+        "motion": cast(JsonValue, motion),
         "created_at": created_at.get(visual_id, now),
         "updated_at": now,
     }
@@ -606,6 +664,7 @@ def _planning_summary(data: ProjectState, chunk_id: str, chunk: JsonObject | Non
         "state": chunk.get("visual_planning") if chunk is not None else None,
         "intent_count": len(intents),
         "by_status": dict(sorted(statuses.items())),
+        "quality_policy": cast(JsonValue, quality_policy()),
     }
 
 

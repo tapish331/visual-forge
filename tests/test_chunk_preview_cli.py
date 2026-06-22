@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import struct
 import subprocess
 import sys
@@ -14,12 +15,16 @@ ProjectJson: TypeAlias = dict[str, object]
 Record: TypeAlias = dict[str, object]
 
 
-def run_cli(*args: str | Path) -> subprocess.CompletedProcess[str]:
+def run_cli(*args: str | Path, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+    command_env = os.environ.copy()
+    if env is not None:
+        command_env.update(env)
     return subprocess.run(
         [sys.executable, "-m", "app.main", *(str(arg) for arg in args)],
         cwd=REPO_ROOT,
         text=True,
         capture_output=True,
+        env=command_env,
     )
 
 
@@ -87,6 +92,26 @@ def test_chunk_preview_rerun_upserts_record_without_duplication(tmp_path: Path) 
     data = load_project(project_dir)
     assert len(record_list(data, "chunk_previews")) == 1
     assert len(record_list(data, "previews")) == 1
+
+
+def test_chunk_preview_handles_mp4_visual_preview(tmp_path: Path) -> None:
+    project_dir = prepared_legacy_project(tmp_path)
+    visual_id = add_animated_chunk_visual(project_dir)
+    ffmpeg = fake_ffmpeg(tmp_path)
+
+    result = run_cli("preview", project_dir, "--chunk", "chunk_001", "--json", env={"VISUAL_FORGE_FFMPEG": str(ffmpeg)})
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    summary = json_object(result.stdout)
+    assert summary["success"] is True
+    output_path = Path(string_value(summary, "output_path"))
+    assert read_png_size(output_path) == (1920, 1080)
+    data = load_project(project_dir)
+    visual = next(item for item in record_list(data, "visuals") if item["id"] == visual_id)
+    preview_id = string_value(visual, "preview_id")
+    preview = next(item for item in record_list(data, "previews") if item["id"] == preview_id)
+    assert preview["output_type"] == "mp4"
+    assert str(preview["output"]).endswith(".mp4")
 
 
 def test_chunk_preview_human_output_is_compact(tmp_path: Path) -> None:
@@ -227,6 +252,28 @@ def add_chunk_visual(project_dir: Path) -> str:
     return visual_id
 
 
+def add_animated_chunk_visual(project_dir: Path) -> str:
+    result = run_cli(
+        "add-visual",
+        project_dir,
+        "--chunk",
+        "chunk_001",
+        "--template",
+        "animated_opening_hook",
+        "--start",
+        "12.5",
+        "--end",
+        "18",
+        "--params-json",
+        '{"title":"Animated idea"}',
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr
+    visual_id = json_object(result.stdout)["visual_id"]
+    assert isinstance(visual_id, str)
+    return visual_id
+
+
 def load_project(project_dir: Path) -> ProjectJson:
     raw: object = json.loads((project_dir / "project.json").read_text(encoding="utf-8"))
     assert isinstance(raw, dict)
@@ -267,3 +314,32 @@ def read_png_size(path: Path) -> tuple[int, int]:
     assert isinstance(width_raw, int)
     assert isinstance(height_raw, int)
     return width_raw, height_raw
+
+
+def fake_ffmpeg(tmp_path: Path) -> Path:
+    script = tmp_path / "fake_ffmpeg.py"
+    script.write_text(
+        "\n".join(
+            [
+                "from __future__ import annotations",
+                "import sys",
+                "from pathlib import Path",
+                "from PIL import Image",
+                "output = Path(sys.argv[-1])",
+                "output.parent.mkdir(parents=True, exist_ok=True)",
+                "if output.suffix.lower() == '.png':",
+                "    Image.new('RGB', (1920, 1080), (18, 24, 32)).save(output, format='PNG')",
+                "else:",
+                "    output.write_bytes(b'fake mp4 data')",
+                "raise SystemExit(0)",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    if os.name == "nt":
+        wrapper = tmp_path / "fake_ffmpeg.cmd"
+        wrapper.write_text(f'@echo off\r\n"{sys.executable}" "{script}" %*\r\n', encoding="utf-8")
+        return wrapper
+    script.chmod(0o755)
+    return script

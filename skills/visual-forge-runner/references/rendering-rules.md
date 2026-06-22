@@ -7,9 +7,12 @@ Use this reference for chunk preview, chunk render, final composition, and final
 For visual chunks:
 
 ```powershell
+python -m app.main visual-plan-review <project_dir> --chunk <chunk_id> --json
 python -m app.main preview <project_dir> --chunk <chunk_id> --json
 python -m app.main render-chunk <project_dir> <chunk_id> --json
 ```
+
+Normal Codex-authored visual chunks should pass `visual-plan-review` before preview. Static PNG visuals remain valid for manual or legacy plans, but production Codex plans should bind animated MP4 templates unless the human explicitly asks for a legacy/static treatment.
 
 For camera-only chunks:
 

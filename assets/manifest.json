@@ -32,6 +32,22 @@
       },
       "registered_at": "2026-06-21T19:43:05Z",
       "updated_at": "2026-06-21T19:43:05Z"
+    },
+    {
+      "id": "personal_documentary_texture",
+      "version": "1.0.0",
+      "type": "image",
+      "path": "images/personal_documentary_texture.png",
+      "media_type": "image/png",
+      "width": 1920,
+      "height": 1080,
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 28564,
+        "sha256": "973d5d15168dc474240dcb754b917cf165ea634e9e67fb13ad13f55a0c955b60"
+      },
+      "registered_at": "2026-06-22T07:20:32Z",
+      "updated_at": "2026-06-22T07:20:32Z"
     }
   ]
 }

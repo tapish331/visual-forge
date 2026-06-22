@@ -59,8 +59,8 @@ $project = "projects/my-video"
 & $py -m app.main create-chunks $project --json
 & $py -m app.main chunks $project
 # Repeat visual planning, preview, and rendering for every chunk.
-# Prefer visual-forge-runner for Codex-authored intents. This deterministic
-# fallback keeps the shell example executable without constructing plan JSON.
+# Prefer visual-forge-runner for dense Codex-authored animated intents.
+# This shell-only fallback remains available when you want a deterministic run.
 & $py -m app.main plan-visuals $project --chunk chunk_001 --json
 & $py -m app.main visuals $project --chunk chunk_001
 & $py -m app.main preview $project --chunk chunk_001 --json
@@ -137,12 +137,12 @@ The deterministic pipeline through final verification exists today. Later rows d
 | 7 | Create chunks | Implemented | Approve camera-only chunks when no visuals are needed. | Split the full timeline into contiguous checkpoint-sized chunks and record provenance. | `app/chunks.py` |
 | 8 | Show status | Implemented | Review current progress. | Summarize what is complete, stale, failed, or next. | `app/status.py` |
 | 8a | Recommend next checkpoint | Implemented | Ask what should happen next. | Use compact state to choose the next deterministic command or stop for human input. | `app/next_step.py` |
-| 9 | Plan visuals per chunk | Partial | Give feedback if visual choices feel wrong. | Author template-independent intents from compact context; heuristic and manual planning remain available. | `app/visual_intents.py`, `app/visual_planner.py`, `app/visuals.py` |
+| 9 | Plan visuals per chunk | Partial | Give feedback if visual choices feel wrong. | Author dense animated template-independent intents from compact context; heuristic and manual planning remain available. | `app/visual_intents.py`, `app/visual_quality.py`, `app/visual_planner.py`, `app/visuals.py` |
 | 10 | Inspect template inventory | Implemented | No action. | Check whether required visual capabilities already exist. | `app/templates.py` |
 | 11 | Create missing template | Implemented | Review generated output. | Scaffold the exact missing capability, implement template-owned style, validate, and smoke-render it. | `app/templates.py` |
 | 12 | Create missing base asset | Implemented | Review generated output. | Create an offline/local PNG, then register, validate, and fingerprint it. | `app/assets.py` |
 | 13 | Write render items | Planned | No action. | Convert visual plans into exact render instructions. | `app/render_plan.py` |
-| 14 | Render preview | Implemented | Inspect one PNG visual or chunk storyboard. | Render one template, planned visual, or chunk visual storyboard; video and PNG-sequence previews remain planned. | `app/preview.py` |
+| 14 | Render preview | Implemented | Inspect one PNG/MP4 visual or chunk storyboard. | Render one template, planned visual, or chunk visual storyboard; PNG and MP4 previews are implemented, PNG-sequence previews remain planned. | `app/preview.py` |
 | 15 | Apply corrections | Partial | Tell the runner what is wrong. | Visual-plan correction exists; other correction workflows are planned. | `app/visuals.py` |
 | 16 | Render chunk | Implemented | Inspect chunk output. | Run deterministic rendering after dependencies are ready. | `app/render.py` |
 | 17 | Check cache | Planned | No action. | Avoid regenerating unchanged work. | `app/cache.py` |
@@ -192,6 +192,7 @@ outputs/my-video/
     script_alignment.json
   previews/
     preview_<hash>.png
+    preview_<hash>.mp4
   chunk-previews/
     chunk_001.png
     chunk_001.json
@@ -299,7 +300,7 @@ Pipeline stages carry provenance fingerprints. Large video/audio files use size 
 
 Chunking records its alignment fingerprint, canonical timeline fingerprint, duration options, complete coverage summary, and deterministic chunk-plan fingerprint. Legacy chunks without this provenance are `unverified` and must be regenerated once with `create-chunks --force`.
 
-Render dependencies use the same rule. Preview records fingerprint the template source and generated PNG. Each chunk render records a canonical fingerprint of its chunk-scoped visual plan plus the fingerprints of every preview it consumed. Adding or updating a visual, changing a template, or changing/removing a preview makes the affected chunk render stale; final composition and verification then become stale through dependency propagation.
+Render dependencies use the same rule. Preview records fingerprint the template source and generated PNG or MP4. Each chunk render records a canonical fingerprint of its chunk-scoped visual plan plus the fingerprints of every preview it consumed. Adding or updating a visual, changing a template, or changing/removing a preview makes the affected chunk render stale; final composition and verification then become stale through dependency propagation.
 
 Generated files are retained when they become stale. The status checkpoint rolls back, but old previews, chunk MP4s, `final.mp4`, and verification reports remain available for inspection until successful commands replace them.
 
@@ -427,6 +428,8 @@ python -m app.main plan-visuals projects/my-video --chunk chunk_001 --max-visual
 python -m app.main plan-visuals projects/my-video --chunk chunk_001 --force-generated --json
 python -m app.main planning-context projects/my-video --chunk chunk_001 --json
 python -m app.main apply-visual-plan projects/my-video --chunk chunk_001 --plan-json $planJson --json
+python -m app.main visual-plan-review projects/my-video --chunk chunk_001
+python -m app.main visual-plan-review projects/my-video --chunk chunk_001 --json
 python -m app.main visual-intents projects/my-video --chunk chunk_001 --json
 python -m app.main visual-intents projects/my-video --chunk chunk_001 --gaps-only --json
 python -m app.main bind-visual-intent projects/my-video intent_abc123 --template newspaper_headline --params-json $paramsJson --json
@@ -441,6 +444,7 @@ python -m app.main validate-template templates/simple_card.py
 python -m app.main validate-template templates/simple_card.py --json
 python -m app.main render-template simple_card outputs/simple_card.png --params-json "{\"title\":\"Hello\"}"
 python -m app.main render-template templates/simple_card.py outputs/simple_card.png --params-json "{\"title\":\"Hello\"}" --json
+python -m app.main render-template animated_opening_hook outputs/opening.mp4 --params-json "{\"title\":\"Hello\"}" --duration-seconds 6 --json
 python -m app.main preview projects/my-video --template simple_card --params-json "{\"title\":\"Hello\"}"
 python -m app.main preview projects/my-video --template templates/simple_card.py --params-json "{\"title\":\"Hello\"}" --json
 python -m app.main preview projects/my-video --chunk chunk_001
@@ -486,6 +490,12 @@ planning-context -> Codex judgment -> apply-visual-plan -> preview
 
 `planning-context` exposes only the requested chunk's aligned text, timing, existing visual coverage, and compact template capabilities. Codex writes project-level `visual_intents` containing purpose, content, timing, source block IDs, intent type, and optional style notes.
 
+Normal Codex-authored production plans are dense and animated by contract. The first visual starts at the chunk start, the hard minimum visual count is `ceil(chunk_duration / 10)`, the target count is `ceil(chunk_duration / 7.5)`, no uncovered visual gap may exceed 8 seconds, and chunks over 120 seconds must use at least 7 distinct intent types. New Codex intents include `visual_role` and `motion` metadata, prefer `mp4`, and long visuals declare internal motion beats. `visual-plan-review` checks density, opening hook, gap coverage, diversity, static bindings, and motion beats before preview.
+
+```powershell
+python -m app.main visual-plan-review projects/my-video --chunk chunk_001 --json
+```
+
 Intent states are:
 
 ```text
@@ -512,7 +522,7 @@ Each template must declare:
 
 Templates may also declare `TEMPLATE_STATUS`; it defaults to `ready` for backward compatibility.
 
-Template inventory, validation, contract-level template rendering, and PNG project preview are implemented. `simple_card` can render a deterministic `1920x1080` PNG. Chunk rendering, final composition, and final verification are implemented. Video and PNG-sequence template previews remain planned.
+Template inventory, validation, contract-level template rendering, PNG project preview, and MP4 visual preview are implemented. `simple_card` can render a deterministic `1920x1080` PNG. Animated templates can render deterministic `1920x1080` MP4 inserts when given `--duration-seconds` directly or visual timing through project preview. Chunk rendering overlays PNG and MP4 visual previews, then final composition and final verification complete the video. PNG-sequence template previews remain planned.
 
 Template metadata may advertise lowercase snake-case capability IDs such as `key_point`, `quote`, or `newspaper_headline`. Visual intents use exact capability matching to find candidate templates. Missing capability metadata remains backward compatible but prevents automatic matching.
 
@@ -675,6 +685,7 @@ What exists today:
 pyproject.toml
 app/__init__.py
 app/align.py
+app/animation.py
 app/artifacts.py
 app/assets.py
 app/audio.py
@@ -699,6 +710,7 @@ app/timeline.py
 app/transcribe.py
 app/visual_intents.py
 app/visual_planner.py
+app/visual_quality.py
 app/visuals.py
 app/verify.py
 skills/visual-forge-runner/SKILL.md
@@ -711,13 +723,18 @@ skills/visual-forge-runner/references/rendering-rules.md
 skills/visual-forge-runner/references/template-contract.md
 skills/visual-forge-runner/references/visual-planning.md
 templates/__init__.py
+templates/animated_journey_map.py
+templates/animated_opening_hook.py
+templates/creator_journey_map.py
+templates/kinetic_text_beat.py
 templates/newspaper_headline.py
 templates/simple_card.py
 assets/manifest.json
+assets/images/creator_journey_texture.png
 assets/images/newspaper_base.png
 ```
 
-Project initialization with canonical or external input references, three-root slug-based layout metadata, legacy layout adoption, atomic checkpoint writes, hybrid artifact fingerprints, stale dependency detection, status reporting, read-only next-step recommendation, raw media probing with `ffprobe`, narration audio extraction with FFmpeg, offline narration transcription through `faster-whisper` or deterministic mock providers, metadata-aware alignment with compact review, full-timeline contiguous chunk creation, camera-only chunk approval, active/resolved failure management, process-safe bounded logging, project mutation locks, template contract validation, template capability inventory, draft scaffolding, registered local PNG assets, required-asset enforcement, targeted intent binding, deterministic template rendering, PNG project preview, Codex-authored visual intents, capability-gap detection, deterministic fallback planning, project-level and chunk-scoped visual items, preview-by-visual-ID, chunk storyboard preview, render dependency fingerprinting, exact-duration chunk MP4 rendering, final composition, final verification, visual correction through `update-visual`, and Runner Skill V0 are implemented. Render-plan normalization, cache optimization, additional asset types, video/sequence templates, and most later flow scripts are not implemented yet.
+Project initialization with canonical or external input references, three-root slug-based layout metadata, legacy layout adoption, atomic checkpoint writes, hybrid artifact fingerprints, stale dependency detection, status reporting, read-only next-step recommendation, raw media probing with `ffprobe`, narration audio extraction with FFmpeg, offline narration transcription through `faster-whisper` or deterministic mock providers, metadata-aware alignment with compact review, full-timeline contiguous chunk creation, camera-only chunk approval, active/resolved failure management, process-safe bounded logging, project mutation locks, template contract validation, template capability inventory, draft scaffolding, registered local PNG assets, required-asset enforcement, targeted intent binding, deterministic PNG/MP4 template rendering, Codex-authored dense animated visual intents, visual-plan quality review, capability-gap detection, deterministic fallback planning, project-level and chunk-scoped visual items, preview-by-visual-ID, chunk storyboard preview with MP4 thumbnails, render dependency fingerprinting, exact-duration chunk MP4 rendering with PNG/MP4 visual inserts, final composition, final verification, visual correction through `update-visual`, and Runner Skill V0 are implemented. Render-plan normalization, cache optimization, additional asset types, PNG-sequence templates, and most later flow scripts are not implemented yet.
 
 ## Implemented Foundation
 
@@ -753,7 +770,7 @@ The first useful milestone is the project-control and template-contract foundati
 28. Render a previewed chunk into an MP4 segment under `renders/chunks/`.
 29. Compose rendered chunks into `final.mp4`.
 30. Verify final container, streams, timing, codecs, color metadata, and recommendation warnings with `verify-final`.
-31. Fingerprint preview templates, preview PNGs, visual plans, and chunk-render inputs so visual changes invalidate final output mechanically.
+31. Fingerprint preview templates, preview PNG/MP4 artifacts, visual plans, and chunk-render inputs so visual changes invalidate final output mechanically.
 32. Preserve the full raw-video timeline with contiguous midpoint chunk boundaries and verified zero-gap coverage.
 33. Fingerprint chunk plans against alignment and timeline inputs so upstream changes roll status back correctly.
 34. Explicitly approve camera-only chunks without requiring artificial visuals.
@@ -765,6 +782,9 @@ The first useful milestone is the project-control and template-contract foundati
 40. Register, validate, fingerprint, and enforce reusable local PNG assets.
 41. Bind one existing visual intent without replacing unrelated project planning.
 42. Provide the asset-backed `newspaper_headline` capability and runner materialization workflow.
+43. Enforce dense animated Codex visual-plan quality with `visual-plan-review`.
+44. Render deterministic MP4 visual templates and use MP4 previews in chunk storyboards and chunk renders.
+45. Provide proof animated capabilities: `animated_opening_hook`, `kinetic_text_beat`, and `animated_journey_map`.
 
 The next slice should normalize executable render plans and add content-addressed caching so unchanged previews and chunk outputs can be reused safely.
 

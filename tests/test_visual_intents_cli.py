@@ -84,12 +84,12 @@ def test_bound_intent_creates_linked_visual_and_is_idempotent(tmp_path: Path) ->
     project = load_project(project_dir)
     intents = record_list(project, "visual_intents")
     visuals = record_list(project, "visuals")
-    assert len(intents) == 1
-    assert len(visuals) == 1
-    assert intents[0]["status"] == "bound"
-    assert intents[0]["visual_id"] == visuals[0]["id"]
-    assert visuals[0]["intent_id"] == intents[0]["id"]
-    assert visuals[0]["planner"] == "codex_v1"
+    assert len(intents) == 2
+    assert len(visuals) == 2
+    assert {intent["status"] for intent in intents} == {"bound"}
+    for intent in intents:
+        assert any(visual["id"] == intent["visual_id"] for visual in visuals)
+    assert {visual["planner"] for visual in visuals} == {"codex_v1"}
     chunk = record_list(project, "chunks")[0]
     assert chunk["visual_mode"] == "visuals"
     assert chunk["status"] == "new"
@@ -111,7 +111,7 @@ def test_unbound_and_capability_gap_are_soft_planning_states(tmp_path: Path) -> 
         "--chunk",
         "chunk_001",
         "--plan-json",
-        unbound_plan("block_001", "key_point"),
+            unbound_plan("block_001", "animated_key_point"),
         "--json",
     )
     gap = run_cli(
@@ -126,13 +126,16 @@ def test_unbound_and_capability_gap_are_soft_planning_states(tmp_path: Path) -> 
 
     assert unbound.returncode == 0, unbound.stderr
     assert json_object(unbound.stdout)["unbound_count"] == 1
-    unbound_intent = record_list(load_project(unbound_project), "visual_intents")[0]
-    assert unbound_intent["candidate_template_ids"] == ["simple_card"]
+    unbound_intent = next(
+        intent for intent in record_list(load_project(unbound_project), "visual_intents")
+        if intent["status"] == "unbound"
+    )
+    assert unbound_intent["candidate_template_ids"] == ["kinetic_text_beat"]
     assert gap.returncode == 0, gap.stderr
     assert json_object(gap.stdout)["capability_gap_count"] == 1
     gap_state = load_project(gap_project)
     assert record_list(gap_state, "failures") == []
-    assert record_list(gap_state, "visuals") == []
+    assert len(record_list(gap_state, "visuals")) == 1
 
 
 def test_visual_intents_gaps_only_filters_results(tmp_path: Path) -> None:
@@ -146,7 +149,7 @@ def test_visual_intents_gaps_only_filters_results(tmp_path: Path) -> None:
         "--chunk",
         "chunk_001",
         "--plan-json",
-        unbound_plan("block_001", "timeline_map"),
+            gap_plan("block_001", "timeline_map"),
     ).returncode == 0
 
     result = run_cli("visual-intents", project_dir, "--chunk", "chunk_001", "--gaps-only", "--json")
@@ -166,19 +169,23 @@ def test_targeted_binding_preserves_unrelated_intents_and_manual_visuals(tmp_pat
         {
             "intents": [
                 {
-                    "intent_type": "newspaper_headline",
-                    "purpose": "Present the claim as contemporary reporting.",
-                    "start": 1.0,
-                    "end": 5.0,
+                    "intent_type": "animated_journey_map",
+                    "purpose": "Map the creator's journey as a moving sequence.",
+                    "visual_role": "context",
+                    "motion": motion(),
+                    "start": 0.0,
+                    "end": 6.0,
                     "source_block_ids": ["block_001"],
-                    "content": {"headline": "A New Era Begins"},
+                    "content": {"title": "Creator journey"},
                     "binding": None,
                 },
                 {
-                    "intent_type": "key_point",
-                    "purpose": "Summarize the key point.",
+                    "intent_type": "animated_key_point",
+                    "purpose": "Summarize the key point with motion.",
+                    "visual_role": "emphasis",
+                    "motion": motion(),
                     "start": 6.0,
-                    "end": 10.0,
+                    "end": 12.0,
                     "source_block_ids": ["block_001"],
                     "content": {"title": "Key point"},
                     "binding": None,
@@ -191,7 +198,7 @@ def test_targeted_binding_preserves_unrelated_intents_and_manual_visuals(tmp_pat
     intent_id = next(
         str(intent["id"])
         for intent in record_list(load_project(project_dir), "visual_intents")
-        if intent["intent_type"] == "newspaper_headline"
+        if intent["intent_type"] == "animated_journey_map"
     )
     manual = run_cli(
         "add-visual",
@@ -214,9 +221,9 @@ def test_targeted_binding_preserves_unrelated_intents_and_manual_visuals(tmp_pat
         project_dir,
         intent_id,
         "--template",
-        "newspaper_headline",
+        "animated_journey_map",
         "--params-json",
-        '{"headline":"A New Era Begins"}',
+        '{"title":"Creator journey","stages":[{"label":"Start","detail":"The first step"},{"label":"Build","detail":"The focused work"}]}',
         "--json",
     )
     second = run_cli(
@@ -224,9 +231,9 @@ def test_targeted_binding_preserves_unrelated_intents_and_manual_visuals(tmp_pat
         project_dir,
         intent_id,
         "--template",
-        "newspaper_headline",
+        "animated_journey_map",
         "--params-json",
-        '{"headline":"A New Era Begins"}',
+        '{"title":"Creator journey","stages":[{"label":"Start","detail":"The first step"},{"label":"Build","detail":"The focused work"}]}',
         "--json",
     )
 
@@ -253,16 +260,20 @@ def test_targeted_binding_failure_deduplicates_and_success_resolves(tmp_path: Pa
         "--chunk",
         "chunk_001",
         "--plan-json",
-        unbound_plan("block_001", "newspaper_headline"),
+        unbound_plan("block_001", "animated_journey_map"),
     ).returncode == 0
-    intent_id = str(record_list(load_project(project_dir), "visual_intents")[0]["id"])
+    intent_id = next(
+        str(intent["id"])
+        for intent in record_list(load_project(project_dir), "visual_intents")
+        if intent["intent_type"] == "animated_journey_map"
+    )
 
     first = run_cli(
         "bind-visual-intent",
         project_dir,
         intent_id,
         "--template",
-        "newspaper_headline",
+        "animated_journey_map",
         "--params-json",
         "{}",
         "--json",
@@ -272,7 +283,7 @@ def test_targeted_binding_failure_deduplicates_and_success_resolves(tmp_path: Pa
         project_dir,
         intent_id,
         "--template",
-        "newspaper_headline",
+        "animated_journey_map",
         "--params-json",
         "{}",
         "--json",
@@ -289,9 +300,9 @@ def test_targeted_binding_failure_deduplicates_and_success_resolves(tmp_path: Pa
         project_dir,
         intent_id,
         "--template",
-        "newspaper_headline",
+        "animated_journey_map",
         "--params-json",
-        '{"headline":"A New Era Begins"}',
+        '{"title":"Creator journey","stages":[{"label":"Start","detail":"The first step"},{"label":"Build","detail":"The focused work"}]}',
         "--json",
     )
 
@@ -415,7 +426,7 @@ def test_next_routes_context_unbound_gap_and_bound_states(tmp_path: Path) -> Non
         "--chunk",
         "chunk_001",
         "--plan-json",
-        unbound_plan("block_001", "key_point"),
+            unbound_plan("block_001", "animated_key_point"),
     ).returncode == 0
     unbound_next = json_object(run_cli("next", context_project, "--json").stdout)
     assert "visual-intents" in cast(list[object], unbound_next["recommended_command"])
@@ -452,10 +463,118 @@ def test_next_routes_context_unbound_gap_and_bound_states(tmp_path: Path) -> Non
     assert "preview" in cast(list[object], bound_next["recommended_command"])
 
 
+def test_visual_plan_review_rejects_sparse_static_plan(tmp_path: Path) -> None:
+    project_dir = prepare_project(
+        tmp_path,
+        [aligned_block("block_001", 0.0, 145.0, "A long chunk needs dense animated visual coverage.")],
+    )
+    project = load_project(project_dir)
+    project["visual_intents"] = [
+        quality_intent(index, start, start + 5.0, "title_card", "simple_card")
+        for index, start in enumerate((20.0, 45.0, 80.0, 120.0), start=1)
+    ]
+    write_project(project_dir / "project.json", cast(ProjectState, project))
+
+    result = run_cli("visual-plan-review", project_dir, "--chunk", "chunk_001", "--json")
+
+    assert result.returncode == 1
+    review = json_object(result.stdout)
+    assert review["passed"] is False
+    messages = [str(check["message"]) for check in record_list(review, "checks") if check.get("passed") is False]
+    assert any("needs at least 15 visuals" in message for message in messages)
+    assert any("must start with a visual" in message for message in messages)
+    assert any("static/non-MP4" in message for message in messages)
+
+
+def test_visual_plan_review_accepts_dense_animated_plan(tmp_path: Path) -> None:
+    project_dir = prepare_project(
+        tmp_path,
+        [aligned_block("block_001", 0.0, 145.0, "A long chunk can pass with dense animated coverage.")],
+    )
+    project = load_project(project_dir)
+    intent_types = [
+        "animated_opening_hook",
+        "kinetic_text_beat",
+        "animated_journey_map",
+        "timeline_motion",
+        "evidence_reveal",
+        "contrast_scene",
+        "recap_motion",
+    ]
+    templates = ["animated_opening_hook", "kinetic_text_beat", "animated_journey_map"]
+    intents: list[Record] = []
+    visual_count = 20
+    for index in range(visual_count):
+        start = round(index * 145.0 / visual_count, 3)
+        end = round((index + 1) * 145.0 / visual_count, 3)
+        intents.append(
+            quality_intent(
+                index + 1,
+                start,
+                end,
+                intent_types[index % len(intent_types)],
+                templates[index % len(templates)],
+            )
+        )
+    project["visual_intents"] = intents
+    write_project(project_dir / "project.json", cast(ProjectState, project))
+
+    result = run_cli("visual-plan-review", project_dir, "--chunk", "chunk_001", "--json")
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    review = json_object(result.stdout)
+    assert review["passed"] is True
+    counts = object_dict(review, "counts")
+    assert counts["intent_count"] == 20
+    assert counts["distinct_intent_types"] == 7
+    animated_checks = [check for check in record_list(review, "checks") if check.get("id") == "animated_binding"]
+    assert animated_checks
+    assert all(check.get("passed") is True for check in animated_checks)
+    assert all("animated MP4 template" in str(check["message"]) for check in animated_checks)
+    assert all("static/non-MP4" not in str(check["message"]) for check in animated_checks)
+
+
 def test_intent_id_excludes_timing_and_binding() -> None:
     first = build_intent_id("chunk_001", "key_point", "Purpose", {"title": "Key"}, None, ["block_001"])
     second = build_intent_id("chunk_001", "key_point", "Purpose", {"title": "Key"}, None, ["block_001"])
     assert first == second
+
+
+def quality_intent(
+    index: int,
+    start: float,
+    end: float,
+    intent_type: str,
+    template_ref: str,
+    *,
+    output_motion: bool = True,
+) -> Record:
+    motion_record = motion() if output_motion else None
+    binding: Record = {
+        "template_ref": template_ref,
+        "template_id": template_ref,
+        "params": {"title": f"Visual {index}", "text": f"Visual {index}"},
+    }
+    return {
+        "id": f"intent_quality_{index:03d}",
+        "chunk_id": "chunk_001",
+        "start": start,
+        "end": end,
+        "source_block_ids": ["block_001"],
+        "intent_type": intent_type,
+        "purpose": f"Quality review visual {index}.",
+        "content": {"title": f"Visual {index}"},
+        "style_notes": None,
+        "visual_role": "hook" if index == 1 else "emphasis",
+        "motion": motion_record,
+        "status": "bound",
+        "candidate_template_ids": [template_ref],
+        "binding": binding,
+        "visual_id": f"visual_quality_{index:03d}",
+        "planner": "codex_v1",
+        "created_at": "2026-06-20T00:00:00Z",
+        "updated_at": "2026-06-20T00:00:00Z",
+    }
 
 
 def prepare_project(
@@ -541,15 +660,29 @@ def bound_plan(block_id: str, *, purpose: str = "Emphasize the key claim.") -> s
         {
             "intents": [
                 {
-                    "intent_type": "key_point",
+                    "intent_type": "animated_opening_hook",
                     "purpose": purpose,
-                    "start": 2.0,
+                    "visual_role": "hook",
+                    "motion": motion(),
+                    "start": 0.0,
                     "end": 6.0,
                     "source_block_ids": [block_id],
                     "content": {"title": "Key idea"},
                     "style_notes": None,
-                    "binding": {"template_ref": "simple_card", "params": {"title": "Key idea"}},
-                }
+                    "binding": {"template_ref": "animated_opening_hook", "params": {"title": "Key idea"}},
+                },
+                {
+                    "intent_type": "kinetic_text_beat",
+                    "purpose": "Carry the second animated beat.",
+                    "visual_role": "emphasis",
+                    "motion": motion(),
+                    "start": 6.0,
+                    "end": 12.0,
+                    "source_block_ids": [block_id],
+                    "content": {"text": "Second idea"},
+                    "style_notes": None,
+                    "binding": {"template_ref": "kinetic_text_beat", "params": {"text": "Second idea"}},
+                },
             ]
         }
     )
@@ -560,18 +693,46 @@ def unbound_plan(block_id: str, intent_type: str) -> str:
         {
             "intents": [
                 {
-                    "intent_type": intent_type,
-                    "purpose": "Show the idea with an appropriate visual capability.",
-                    "start": 2.0,
+                    "intent_type": "animated_opening_hook",
+                    "purpose": "Open the chunk with immediate motion.",
+                    "visual_role": "hook",
+                    "motion": motion(),
+                    "start": 0.0,
                     "end": 6.0,
                     "source_block_ids": [block_id],
                     "content": {"title": "Key idea"},
                     "style_notes": None,
+                    "binding": {"template_ref": "animated_opening_hook", "params": {"title": "Key idea"}},
+                },
+                {
+                    "intent_type": intent_type,
+                    "purpose": "Show the idea with an appropriate visual capability.",
+                    "visual_role": "emphasis",
+                    "motion": motion(),
+                    "start": 6.0,
+                    "end": 12.0,
+                    "source_block_ids": [block_id],
+                    "content": {"title": "Key idea"},
+                    "style_notes": None,
                     "binding": None,
-                }
+                },
             ]
         }
     )
+
+
+def gap_plan(block_id: str, intent_type: str) -> str:
+    return unbound_plan(block_id, intent_type)
+
+
+def motion() -> Record:
+    return {
+        "preferred_output_type": "mp4",
+        "beats": [0.0, 3.0, 6.0],
+        "transition_in": "cut",
+        "transition_out": "fade",
+        "animation_notes": "Animate text and layout elements over the beat.",
+    }
 
 
 def alignment_duration(blocks: list[Record]) -> float:

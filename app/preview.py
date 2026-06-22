@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import subprocess
 from pathlib import Path
 from typing import TypedDict, cast
 
@@ -12,11 +13,12 @@ from PIL import Image, ImageDraw, ImageFont
 from PIL import UnidentifiedImageError
 
 from .artifacts import atomic_write_json, replace_artifact, temporary_artifact_path
+from .audio import resolve_ffmpeg
 from .failures import chunk_failure_scope, record_failure, resolve_matching_failures, template_failure_scope, visual_failure_scope
 from .layout import artifact_path
 from .project import JsonObject, JsonValue, ProjectState, load_project, project_file_for, utc_now_iso, write_project
 from .render_freshness import build_preview_provenance
-from .render_template import parse_params_json, render_template
+from .render_template import parse_params_json, render_template, validate_template_params
 from .visuals import find_visual_for_preview, format_seconds, mark_visual_previewed
 
 
@@ -71,9 +73,11 @@ class RenderedChunkVisual(TypedDict):
     visual_id: str
     template_ref: str
     template_id: str | None
+    output_type: str
     params: dict[str, object]
     start: float
     end: float
+    duration_seconds: float
     preview_id: str
     relative_output: Path
     output_path: Path
@@ -87,8 +91,10 @@ def render_project_preview_from_json(project_dir: Path, template_ref: str, param
         _record_preview_failure(project_dir, data, result)
         return result
 
+    validation = validate_template_params(template_ref, params)
+    output_type = validation["output_type"] or "png"
     preview_id = build_preview_id(template_ref, params)
-    relative_output = preview_output_for(preview_id)
+    relative_output = preview_output_for(preview_id, output_type)
     output_path = artifact_path(project_dir, data, relative_output)
     render_result = render_template(template_ref, output_path, params)
     result = _preview_result(
@@ -102,7 +108,15 @@ def render_project_preview_from_json(project_dir: Path, template_ref: str, param
     )
 
     if result["success"]:
-        _record_preview_success(project_dir, data, result, params, relative_output)
+        _record_preview_success(
+            project_dir,
+            data,
+            result,
+            params,
+            relative_output,
+            render_result["output_type"] or output_type,
+            None,
+        )
     else:
         _record_preview_failure(project_dir, data, result)
     return result
@@ -137,10 +151,25 @@ def render_project_preview_for_chunk(project_dir: Path, chunk_id: str) -> ChunkP
             if lookup["errors"] or template_ref is None:
                 errors.extend(f"{candidate['visual_id']}: {error}" for error in lookup["errors"])
                 continue
-            preview_id = build_preview_id(template_ref, lookup["params"])
-            relative_output = preview_output_for(preview_id)
+            validation = validate_template_params(template_ref, lookup["params"])
+            if not validation["valid"]:
+                errors.extend(f"{candidate['visual_id']}: {error}" for error in validation["errors"])
+                continue
+            output_type = validation["output_type"] or "png"
+            duration_seconds = round(candidate["end"] - candidate["start"], 6)
+            preview_id = build_preview_id(
+                template_ref,
+                lookup["params"],
+                duration_seconds=duration_seconds if output_type == "mp4" else None,
+            )
+            relative_output = preview_output_for(preview_id, output_type)
             output_path = artifact_path(project_dir, data, relative_output)
-            render_result = render_template(template_ref, output_path, lookup["params"])
+            render_result = render_template(
+                template_ref,
+                output_path,
+                lookup["params"],
+                duration_seconds=duration_seconds if output_type == "mp4" else None,
+            )
             if not render_result["success"]:
                 errors.extend(f"{candidate['visual_id']}: {error}" for error in render_result["errors"])
                 continue
@@ -150,9 +179,11 @@ def render_project_preview_for_chunk(project_dir: Path, chunk_id: str) -> ChunkP
                     "visual_id": candidate["visual_id"],
                     "template_ref": template_ref,
                     "template_id": render_result["template_id"],
+                    "output_type": output_type,
                     "params": lookup["params"],
                     "start": candidate["start"],
                     "end": candidate["end"],
+                    "duration_seconds": duration_seconds,
                     "preview_id": preview_id,
                     "relative_output": relative_output,
                     "output_path": output_path,
@@ -216,10 +247,28 @@ def render_project_preview_for_visual(project_dir: Path, visual_id: str) -> Prev
         _record_preview_visual_failure(project_dir, data, result, template_ref)
         return result
 
-    preview_id = build_preview_id(template_ref, lookup["params"])
-    relative_output = preview_output_for(preview_id)
+    visual = lookup["visual"]
+    duration_seconds, duration_errors = _visual_duration(visual)
+    validation = validate_template_params(template_ref, lookup["params"])
+    validation_errors = duration_errors + validation["errors"]
+    if not validation["valid"] or duration_errors:
+        result = _preview_visual_result(project_dir, visual_id, None, None, False, validation_errors)
+        _record_preview_visual_failure(project_dir, data, result, template_ref)
+        return result
+    output_type = validation["output_type"] or "png"
+    preview_id = build_preview_id(
+        template_ref,
+        lookup["params"],
+        duration_seconds=duration_seconds if output_type == "mp4" else None,
+    )
+    relative_output = preview_output_for(preview_id, output_type)
     output_path = artifact_path(project_dir, data, relative_output)
-    render_result = render_template(template_ref, output_path, lookup["params"])
+    render_result = render_template(
+        template_ref,
+        output_path,
+        lookup["params"],
+        duration_seconds=duration_seconds if output_type == "mp4" else None,
+    )
     result = _preview_visual_result(
         project_dir,
         visual_id,
@@ -240,6 +289,8 @@ def render_project_preview_for_visual(project_dir: Path, visual_id: str) -> Prev
             lookup["params"],
             relative_output,
             now,
+            output_type,
+            duration_seconds if output_type == "mp4" else None,
         )
         mark_visual_previewed(data, visual_index, preview_id, now)
         resolve_matching_failures(
@@ -254,9 +305,17 @@ def render_project_preview_for_visual(project_dir: Path, visual_id: str) -> Prev
     return result
 
 
-def build_preview_id(template_ref: str, params: dict[str, object]) -> str:
+def build_preview_id(
+    template_ref: str,
+    params: dict[str, object],
+    *,
+    duration_seconds: float | None = None,
+) -> str:
+    payload: JsonObject = {"template_ref": template_ref, "params": cast(JsonValue, params)}
+    if duration_seconds is not None:
+        payload["duration_seconds"] = duration_seconds
     canonical = json.dumps(
-        {"template_ref": template_ref, "params": params},
+        payload,
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=True,
@@ -265,8 +324,9 @@ def build_preview_id(template_ref: str, params: dict[str, object]) -> str:
     return f"preview_{digest}"
 
 
-def preview_output_for(preview_id: str) -> Path:
-    return Path(PREVIEWS_DIR) / f"{preview_id}.png"
+def preview_output_for(preview_id: str, output_type: str = "png") -> Path:
+    suffix = ".mp4" if output_type == "mp4" else ".png"
+    return Path(PREVIEWS_DIR) / f"{preview_id}{suffix}"
 
 
 def build_chunk_preview_id(chunk_id: str) -> str:
@@ -332,6 +392,8 @@ def _record_preview_success(
     result: PreviewResult,
     params: dict[str, object],
     relative_output: Path,
+    output_type: str,
+    duration_seconds: float | None,
 ) -> None:
     preview_id = result["preview_id"]
     if preview_id is None:
@@ -347,6 +409,8 @@ def _record_preview_success(
         params,
         relative_output,
         now,
+        output_type,
+        duration_seconds,
     )
     resolve_matching_failures(
         data,
@@ -366,17 +430,28 @@ def _record_preview_success_without_write(
     params: dict[str, object],
     relative_output: Path,
     created_or_updated_at: str,
+    output_type: str,
+    duration_seconds: float | None,
 ) -> None:
     previews = _ensure_previews(data)
     existing_index = _find_record_index(previews, preview_id)
     existing_created_at = _created_at_for(previews, existing_index, created_or_updated_at)
-    provenance = build_preview_provenance(project_dir, data, template_ref, relative_output, params)
+    provenance = build_preview_provenance(
+        project_dir,
+        data,
+        template_ref,
+        relative_output,
+        params,
+        output_type=output_type,
+        duration_seconds=duration_seconds,
+    )
     record: JsonObject = {
         "id": preview_id,
         "template_ref": template_ref,
         "template_id": template_id,
         "params": cast(JsonValue, params),
         "output": relative_output.as_posix(),
+        "output_type": output_type,
         "status": "rendered",
         "created_at": existing_created_at,
         "updated_at": created_or_updated_at,
@@ -409,6 +484,8 @@ def _record_chunk_preview_success(
             item["params"],
             item["relative_output"],
             now,
+            item["output_type"],
+            item["duration_seconds"] if item["output_type"] == "mp4" else None,
         )
         mark_visual_previewed(data, item["index"], item["preview_id"], now)
 
@@ -605,8 +682,10 @@ def _chunk_preview_manifest(
                 "preview_id": item["preview_id"],
                 "template_ref": item["template_ref"],
                 "template_id": item["template_id"],
+                "output_type": item["output_type"],
                 "start": item["start"],
                 "end": item["end"],
+                "duration_seconds": item["duration_seconds"],
                 "preview_output": item["relative_output"].as_posix(),
             }
         )
@@ -666,8 +745,7 @@ def _write_storyboard_png(
         thumb_top = upper + 36
         thumb_height = max(1, cell_height - 48)
         thumb_width = max(1, cell_width - 24)
-        with Image.open(item["output_path"]) as source_image:
-            preview = source_image.convert("RGB")
+        preview = _thumbnail_for_visual(item)
         preview.thumbnail((thumb_width, thumb_height), Image.Resampling.LANCZOS)
         paste_left = left + (cell_width - preview.width) // 2
         paste_top = thumb_top + (thumb_height - preview.height) // 2
@@ -685,6 +763,54 @@ def _json_string_list(values: list[str]) -> list[JsonValue]:
     for value in values:
         output.append(value)
     return output
+
+
+def _visual_duration(visual: JsonObject | None) -> tuple[float | None, list[str]]:
+    if visual is None:
+        return None, ["Visual record is missing."]
+    start = _number_field(visual, "start")
+    end = _number_field(visual, "end")
+    if start is None or end is None or end <= start:
+        return None, ["Visual has invalid timing."]
+    return round(end - start, 6), []
+
+
+def _thumbnail_for_visual(item: RenderedChunkVisual) -> Image.Image:
+    output_type = item["output_type"]
+    if output_type == "png":
+        with Image.open(item["output_path"]) as source_image:
+            return source_image.convert("RGB")
+    if output_type != "mp4":
+        raise ValueError(f"Unsupported preview output type for storyboard: {output_type}")
+    ffmpeg, error = resolve_ffmpeg()
+    if ffmpeg is None:
+        raise ValueError(error)
+    frame_target = item["output_path"].with_suffix(".png")
+    with temporary_artifact_path(frame_target) as temporary_frame:
+        completed = subprocess.run(
+            [
+                ffmpeg,
+                "-y",
+                "-i",
+                str(item["output_path"]),
+                "-frames:v",
+                "1",
+                str(temporary_frame),
+            ],
+            shell=False,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+            check=False,
+        )
+        if completed.returncode != 0:
+            detail = f": {completed.stderr.strip()}" if completed.stderr.strip() else ""
+            raise ValueError(f"Could not extract MP4 thumbnail for {item['preview_id']}{detail}")
+        if not temporary_frame.is_file() or temporary_frame.stat().st_size == 0:
+            raise ValueError(f"Could not extract MP4 thumbnail for {item['preview_id']}")
+        with Image.open(temporary_frame) as source_image:
+            return source_image.convert("RGB")
 
 
 def _string_field(data: JsonObject, key: str) -> str | None:

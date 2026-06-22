@@ -16,7 +16,7 @@ python -m app.main visual-intents <project_dir> --chunk <chunk_id> --gaps-only -
 python -m app.main scaffold-template <template_id> --capability <intent_type> --json
 ```
 
-3. Design the template for this capability. Keep style inside the template. Create required PNG assets locally with code, Pillow, or human-supplied files under `assets/`; do not use paid or network generation services.
+3. Design the template for this capability. Keep style inside the template. For normal production capabilities, prefer `OUTPUT_TYPE = "mp4"` and animated motion that satisfies the visual-plan contract. Create required PNG assets locally with code, Pillow, or human-supplied files under `assets/`; do not use paid or network generation services.
 
 4. Register and validate each asset:
 
@@ -30,6 +30,7 @@ python -m app.main validate-asset <asset_id> --json
 ```powershell
 python -m app.main validate-template templates/<template_id>.py --json
 python -m app.main render-template <template_id> <smoke_output.png> --params-json '<json>' --json
+python -m app.main render-template <template_id> <smoke_output.mp4> --params-json '<json>' --duration-seconds 6 --json
 ```
 
 6. Bind only the affected intent:

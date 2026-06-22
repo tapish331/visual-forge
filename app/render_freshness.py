@@ -55,6 +55,9 @@ def build_preview_provenance(
     template_ref: str,
     relative_output: Path,
     params: dict[str, object] | None = None,
+    *,
+    output_type: str = "png",
+    duration_seconds: float | None = None,
     assets_dir: Path = DEFAULT_ASSETS_DIR,
 ) -> JsonObject:
     template_file = resolve_template_file(template_ref)
@@ -69,13 +72,17 @@ def build_preview_provenance(
     if not validation["valid"]:
         raise ValueError(f"Template asset provenance is invalid: {'; '.join(validation['errors'])}")
     output_file = artifact_path(project_dir, data, relative_output)
-    return {
+    provenance: JsonObject = {
+        "output_type": output_type,
         "template_version": version,
         "template_fingerprint": sha256_fingerprint(template_file),
         "required_asset_ids": cast(JsonValue, validation["required_assets"]),
         "asset_fingerprints": cast(JsonValue, validation["asset_fingerprints"]),
         "artifact_fingerprint": sha256_fingerprint(output_file),
     }
+    if duration_seconds is not None:
+        provenance["duration_seconds"] = duration_seconds
+    return provenance
 
 
 def build_preview_freshness(
@@ -89,6 +96,7 @@ def build_preview_freshness(
     output = _string_field(preview, "output")
     template_ref = _string_field(preview, "template_ref")
     template_version = _string_field(preview, "template_version")
+    output_type = _string_field(preview, "output_type") or _output_type_from_path(output)
     if output is None or template_ref is None:
         return freshness(FRESHNESS_UNVERIFIED, REASON_FINGERPRINT_MISSING)
     output_file = artifact_path(project_dir, data, output)
@@ -118,6 +126,8 @@ def build_preview_freshness(
         return freshness(FRESHNESS_MISSING, REASON_ARTIFACT_MISSING)
     info = validate_template_file(template_file)
     if not info["valid"] or not info["ready"] or info["template_version"] != template_version:
+        return freshness(FRESHNESS_STALE, REASON_UPSTREAM_STALE)
+    if info["output_type"] != output_type:
         return freshness(FRESHNESS_STALE, REASON_UPSTREAM_STALE)
     params = cast(dict[str, object], params_value)
     validation = validate_template_params(template_ref, params, assets_dir=assets_dir)
@@ -167,6 +177,8 @@ def build_visual_plan_fingerprint(data: ProjectState, chunk_id: str) -> JsonObje
         if visual.get("planner") == "codex_v1":
             record["planner"] = "codex_v1"
             record["intent_id"] = visual.get("intent_id")
+            record["visual_role"] = visual.get("visual_role")
+            record["motion"] = visual.get("motion")
         visuals.append(record)
     visuals.sort(key=lambda item: str(item.get("id", "")))
     payload: JsonObject = {
@@ -328,3 +340,9 @@ def _number_field(data: JsonObject, key: str) -> float | None:
     if isinstance(value, bool):
         return None
     return float(value) if isinstance(value, int | float) else None
+
+
+def _output_type_from_path(path_value: str | None) -> str:
+    if path_value is not None and Path(path_value).suffix.casefold() == ".mp4":
+        return "mp4"
+    return "png"

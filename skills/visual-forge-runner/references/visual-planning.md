@@ -20,7 +20,30 @@ python -m app.main apply-visual-plan <project_dir> --chunk <chunk_id> --plan-jso
 
 Each intent must include `intent_type`, `purpose`, absolute `start`/`end`, `source_block_ids`, JSON `content`, optional `style_notes`, and an optional `binding`.
 
-Use a binding only when a template genuinely supports the intent type and its params express the intended content. Do not substitute `simple_card` merely because it exists.
+For normal Codex-authored production plans, each intent must also include `visual_role` and `motion`:
+
+- `visual_role`: `hook`, `context`, `proof`, `contrast`, `transition`, `emphasis`, `recap`, or `outro`
+- `motion.preferred_output_type`: `mp4`
+- `motion.beats`: chunk-relative motion beats, with no interval over 12 seconds for long visuals
+- `motion.transition_in`, `motion.transition_out`, and `motion.animation_notes`
+
+Quality rules are mechanical:
+
+- first visual starts at the chunk start, normally timeline `0.0` for the first chunk
+- minimum visual count is `ceil(chunk_duration / 10)`
+- target visual count is `ceil(chunk_duration / 7.5)`
+- no uncovered visual gap exceeds 8 seconds
+- chunks over 120 seconds use at least 7 distinct intent types
+- no more than 25 percent of intents are generic `title_card`, `quote`, or `key_point`
+- no same intent type or template appears more than twice consecutively
+
+Use a binding only when a template genuinely supports the intent type and its params express the intended content. Do not substitute `simple_card` merely because it exists. Capability gaps are expected when the best animated visual has no matching template.
+
+Review plan quality before previewing:
+
+```powershell
+python -m app.main visual-plan-review <project_dir> --chunk <chunk_id> --json
+```
 
 ## Intent Results
 

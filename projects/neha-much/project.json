@@ -1,0 +1,3179 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "neha-much",
+    "script": "../../inputs/Neha_much/VID-20260112-WA0002.mp4.txt",
+    "video": "../../inputs/Neha_much/VID-20260112-WA0002.mp4",
+    "final": "final.mp4",
+    "created_at": "2026-06-21T21:43:03Z",
+    "updated_at": "2026-06-22T07:33:31Z"
+  },
+  "chunks": [
+    {
+      "id": "chunk_001",
+      "start": 0.0,
+      "end": 145.124717,
+      "status": "rendered",
+      "visual_mode": "visuals",
+      "alignment_block_ids": [
+        "block_001",
+        "block_002",
+        "block_003",
+        "block_004",
+        "block_005",
+        "block_006",
+        "block_007",
+        "block_008",
+        "block_009",
+        "block_010",
+        "block_011",
+        "block_012",
+        "block_013",
+        "block_014",
+        "block_015",
+        "block_016",
+        "block_017",
+        "block_018",
+        "block_019",
+        "block_020",
+        "block_021",
+        "block_022",
+        "block_023",
+        "block_024",
+        "block_025",
+        "block_026",
+        "block_027",
+        "block_028",
+        "block_029",
+        "block_030",
+        "block_031",
+        "block_032",
+        "block_033",
+        "block_034",
+        "block_035",
+        "block_036",
+        "block_037",
+        "block_038"
+      ],
+      "warning_block_ids": [],
+      "created_at": "2026-06-21T21:44:50Z",
+      "updated_at": "2026-06-22T07:33:28Z",
+      "visual_planning": {
+        "planner": "codex_v1",
+        "status": "bound",
+        "intent_count": 20,
+        "bound_count": 20,
+        "unbound_count": 0,
+        "capability_gap_count": 0,
+        "updated_at": "2026-06-22T07:23:25Z"
+      }
+    }
+  ],
+  "corrections": [],
+  "cache": {},
+  "failures": [],
+  "media": {
+    "raw": {
+      "path": "../../inputs/Neha_much/VID-20260112-WA0002.mp4",
+      "source_fingerprint": {
+        "kind": "stat_v1",
+        "size_bytes": 23411621,
+        "modified_ns": 1770478007128229100
+      },
+      "duration_seconds": 145.124717,
+      "size_bytes": 23411621,
+      "bit_rate": 1290565,
+      "video": {
+        "codec": "h264",
+        "width": 848,
+        "height": 480,
+        "frame_rate": 29.994
+      },
+      "audio": {
+        "codec": "aac",
+        "sample_rate": 44100,
+        "channels": 2
+      },
+      "probed_at": "2026-06-21T21:43:21Z"
+    },
+    "audio": {
+      "narration": {
+        "path": "audio/narration.wav",
+        "source": "../../inputs/Neha_much/VID-20260112-WA0002.mp4",
+        "source_fingerprint": {
+          "kind": "stat_v1",
+          "size_bytes": 23411621,
+          "modified_ns": 1770478007128229100
+        },
+        "artifact_fingerprint": {
+          "kind": "stat_v1",
+          "size_bytes": 4644070,
+          "modified_ns": 1782078210248003000
+        },
+        "format": "wav",
+        "codec": "pcm_s16le",
+        "sample_rate": 16000,
+        "channels": 1,
+        "duration_seconds": 145.124717,
+        "size_bytes": 4644070,
+        "extracted_at": "2026-06-21T21:43:30Z"
+      }
+    }
+  },
+  "transcript": {
+    "narration": {
+      "path": "transcripts/narration.json",
+      "source": "audio/narration.wav",
+      "source_fingerprint": {
+        "kind": "stat_v1",
+        "size_bytes": 4644070,
+        "modified_ns": 1782078210248003000
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 69572,
+        "sha256": "3646e34a0179bebb340ac28b83566cb000282a0034f5717687186c0a8bcc5a6e"
+      },
+      "provider": "faster-whisper",
+      "model": "large-v3",
+      "device": "auto",
+      "compute_type": "auto",
+      "status": "transcribed",
+      "duration_seconds": 145.124717,
+      "text_length": 2280,
+      "segments": 23,
+      "word_count": 460,
+      "transcribed_at": "2026-06-21T21:44:28Z"
+    }
+  },
+  "alignment": {
+    "script": {
+      "path": "alignment/script_alignment.json",
+      "source_script": "../../inputs/Neha_much/VID-20260112-WA0002.mp4.txt",
+      "source_transcript": "transcripts/narration.json",
+      "method": "sequence_matcher_words_v1",
+      "status": "aligned",
+      "blocks": 38,
+      "aligned_blocks": 38,
+      "coverage": 0.9737,
+      "needs_review_blocks": 0,
+      "unmatched_blocks": 0,
+      "source_fingerprints": {
+        "script_sha256": "4f1fe578e38b1dd021b450804d421c3386fa4f79056a6d0a8f75d36fd86df011",
+        "transcript_sha256": "3646e34a0179bebb340ac28b83566cb000282a0034f5717687186c0a8bcc5a6e"
+      },
+      "aligned_at": "2026-06-21T21:44:37Z",
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 18074,
+        "sha256": "fb12625985cfb9b4036a87b504663d060e132a63b2ed859f36d0164e89141c5b"
+      }
+    }
+  },
+  "previews": [
+    {
+      "id": "preview_57b12e70f8c4",
+      "template_ref": "simple_card",
+      "template_id": "simple_card",
+      "params": {
+        "title": "Two years of trying",
+        "subtitle": "A private creator starts with honesty"
+      },
+      "output": "previews/preview_57b12e70f8c4.png",
+      "status": "rendered",
+      "created_at": "2026-06-21T21:53:48Z",
+      "updated_at": "2026-06-21T21:53:48Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 7125,
+        "sha256": "45f53e9502103081e09bb7388f954e9da15ef7b9815384d9fde7996c5973c7fa"
+      },
+      "required_asset_ids": [],
+      "asset_fingerprints": {},
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 33690,
+        "sha256": "1ae7e75fae02808993b56590f3c68e06937afd57ec7942255fcd692ddc2a26db"
+      }
+    },
+    {
+      "id": "preview_90766ca87c52",
+      "template_ref": "creator_journey_map",
+      "template_id": "creator_journey_map",
+      "params": {
+        "title": "Creating content when privacy wins",
+        "center_text": "not everyone\u2019s cup of tea",
+        "stages": [
+          {
+            "label": "Bedroom spiral",
+            "detail": "Recording, overwhelmed, not posting"
+          },
+          {
+            "label": "Giving it a go",
+            "detail": "Trying without performative motivation"
+          },
+          {
+            "label": "Documenting moments",
+            "detail": "Holding the phone, then being present"
+          },
+          {
+            "label": "Somewhere in between",
+            "detail": "Private, but still wanting a record"
+          }
+        ]
+      },
+      "output": "previews/preview_90766ca87c52.png",
+      "status": "rendered",
+      "created_at": "2026-06-21T21:53:48Z",
+      "updated_at": "2026-06-21T21:53:48Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 9488,
+        "sha256": "20ecae95cefe865ae9ed4e7d36ce22ff08e0202eecd7e3aea99e7cb990da3cba"
+      },
+      "required_asset_ids": [
+        "creator_journey_texture"
+      ],
+      "asset_fingerprints": {
+        "creator_journey_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 56975,
+          "sha256": "1510bb913567d03495611f46137f5975b07bc7300c3cbb725e9b32f1017045f1"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 158399,
+        "sha256": "c4c0d6b31ec533ee260558acf6f5275925e031d59bd74edbbd05ff75c0265e09"
+      }
+    },
+    {
+      "id": "preview_8fb7f6d44a9e",
+      "template_ref": "simple_card",
+      "template_id": "simple_card",
+      "params": {
+        "title": "No fake motivation",
+        "subtitle": "This is my journey. Yours is yours."
+      },
+      "output": "previews/preview_8fb7f6d44a9e.png",
+      "status": "rendered",
+      "created_at": "2026-06-21T21:53:48Z",
+      "updated_at": "2026-06-21T21:53:48Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 7125,
+        "sha256": "45f53e9502103081e09bb7388f954e9da15ef7b9815384d9fde7996c5973c7fa"
+      },
+      "required_asset_ids": [],
+      "asset_fingerprints": {},
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 26845,
+        "sha256": "0611faa872aef46a525c8d9e8fef61c78b6b4df2f2a75dd7c2a90a7c684fff94"
+      }
+    },
+    {
+      "id": "preview_f4d151388f3d",
+      "template_ref": "simple_card",
+      "template_id": "simple_card",
+      "params": {
+        "title": "When I\u2019m 50, I want to look back",
+        "subtitle": "Young, energetic, and with no regrets."
+      },
+      "output": "previews/preview_f4d151388f3d.png",
+      "status": "rendered",
+      "created_at": "2026-06-21T21:53:48Z",
+      "updated_at": "2026-06-21T21:53:48Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 7125,
+        "sha256": "45f53e9502103081e09bb7388f954e9da15ef7b9815384d9fde7996c5973c7fa"
+      },
+      "required_asset_ids": [],
+      "asset_fingerprints": {},
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 38673,
+        "sha256": "1c6c7779f2b686132ebf10059e0e66a5e50c341048c5b793ff37928b4b603bd1"
+      }
+    },
+    {
+      "id": "preview_bd31b2536e9c",
+      "template_ref": "animated_opening_hook",
+      "template_id": "animated_opening_hook",
+      "params": {
+        "title": "Two years of trying",
+        "subtitle": "A private creator starts with honesty",
+        "tone": "private field notes"
+      },
+      "output": "previews/preview_bd31b2536e9c.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 6060,
+        "sha256": "2d31864977247fd197d9381ed1a8b0179375aa6fd20257bee0d7605a8320b05d"
+      },
+      "required_asset_ids": [],
+      "asset_fingerprints": {},
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 438447,
+        "sha256": "d3665b74f3e4bc7a2764450d9f9f8be07afe1cffa3bc6bf3d8cccda7668739c1"
+      },
+      "duration_seconds": 7.4
+    },
+    {
+      "id": "preview_3fb18ed53419",
+      "template_ref": "field_notes_motion",
+      "template_id": "field_notes_motion",
+      "params": {
+        "title": "The bedroom loop",
+        "notes": [
+          "recording stuff",
+          "overwhelmed",
+          "not posting"
+        ],
+        "motif": "spiral"
+      },
+      "output": "previews/preview_3fb18ed53419.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 10038,
+        "sha256": "11724c4ef32606785fb0fb195cd1cd76e6aff7bb41f33c49c632e7c998ced477"
+      },
+      "required_asset_ids": [
+        "personal_documentary_texture"
+      ],
+      "asset_fingerprints": {
+        "personal_documentary_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 28564,
+          "sha256": "973d5d15168dc474240dcb754b917cf165ea634e9e67fb13ad13f55a0c955b60"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 89326,
+        "sha256": "02582acadf86c3eac4d976c0a0e3fc66069c2356f286889b4b1dc7be1d8c8509"
+      },
+      "duration_seconds": 7.4
+    },
+    {
+      "id": "preview_689646def0ac",
+      "template_ref": "kinetic_text_beat",
+      "template_id": "kinetic_text_beat",
+      "params": {
+        "text": "trying meant recording, freezing, not posting",
+        "label": "honest context",
+        "accent": "#bf6a45"
+      },
+      "output": "previews/preview_689646def0ac.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 5129,
+        "sha256": "35abf7ef50c6e9fddbd46440ef9bca6fb14e74b1dded25fef01cd8f250aa4f10"
+      },
+      "required_asset_ids": [],
+      "asset_fingerprints": {},
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 256046,
+        "sha256": "19017adbb3e09e80bd1ad51c1ad1934b89308a89c0a5214ca747467e02d0d88a"
+      },
+      "duration_seconds": 7.4
+    },
+    {
+      "id": "preview_dd2929c83c0b",
+      "template_ref": "contrast_board_motion",
+      "template_id": "contrast_board_motion",
+      "params": {
+        "title": "Not motivation content",
+        "left_label": "selling advice",
+        "right_label": "showing the real attempt",
+        "caption": "No performative pep talk.",
+        "balance": 0.72
+      },
+      "output": "previews/preview_dd2929c83c0b.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 7983,
+        "sha256": "223dae036b86e704f968107d13568915b51282bef995f38a4110dc7e6071f263"
+      },
+      "required_asset_ids": [
+        "personal_documentary_texture"
+      ],
+      "asset_fingerprints": {
+        "personal_documentary_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 28564,
+          "sha256": "973d5d15168dc474240dcb754b917cf165ea634e9e67fb13ad13f55a0c955b60"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 114442,
+        "sha256": "ff460c20c964d77ccafd246ea2b036e525b16d7651b64fe35d1ecad142ed453c"
+      },
+      "duration_seconds": 7.4
+    },
+    {
+      "id": "preview_7d27c6cd2222",
+      "template_ref": "field_notes_motion",
+      "template_id": "field_notes_motion",
+      "params": {
+        "title": "Not everyone\u2019s cup of tea",
+        "notes": [
+          "posting is exposed",
+          "privacy pulls back",
+          "trying anyway"
+        ],
+        "motif": "scale"
+      },
+      "output": "previews/preview_7d27c6cd2222.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 10038,
+        "sha256": "11724c4ef32606785fb0fb195cd1cd76e6aff7bb41f33c49c632e7c998ced477"
+      },
+      "required_asset_ids": [
+        "personal_documentary_texture"
+      ],
+      "asset_fingerprints": {
+        "personal_documentary_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 28564,
+          "sha256": "973d5d15168dc474240dcb754b917cf165ea634e9e67fb13ad13f55a0c955b60"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 89734,
+        "sha256": "ff5251e8b4f5ee9fde7e2d3d3713192ae4bce0d476130e6a3590950ffdab87a8"
+      },
+      "duration_seconds": 7.4
+    },
+    {
+      "id": "preview_58a0cfa5ce22",
+      "template_ref": "kinetic_text_beat",
+      "template_id": "kinetic_text_beat",
+      "params": {
+        "text": "I am a very private person. This feels really hard.",
+        "label": "the hard part",
+        "accent": "#7b5cff"
+      },
+      "output": "previews/preview_58a0cfa5ce22.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 5129,
+        "sha256": "35abf7ef50c6e9fddbd46440ef9bca6fb14e74b1dded25fef01cd8f250aa4f10"
+      },
+      "required_asset_ids": [],
+      "asset_fingerprints": {},
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 256019,
+        "sha256": "3c8517f3745dddb5f7d133476222dd2dc07768efe2917d97c52560093d56755b"
+      },
+      "duration_seconds": 7.4
+    },
+    {
+      "id": "preview_deba34dd25a5",
+      "template_ref": "animated_journey_map",
+      "template_id": "animated_journey_map",
+      "params": {
+        "title": "Loving the record",
+        "center_text": "capturing moments",
+        "stages": [
+          {
+            "label": "I love documenting",
+            "detail": "She is not rejecting the impulse."
+          },
+          {
+            "label": "Room moments",
+            "detail": "The camera comes out when people are having fun."
+          },
+          {
+            "label": "Then presence",
+            "detail": "Recording gives way to just being there."
+          }
+        ]
+      },
+      "output": "previews/preview_deba34dd25a5.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 8573,
+        "sha256": "a954cd579b573026aa1026018818d757abbb35004167d89481cce3018f8257e0"
+      },
+      "required_asset_ids": [
+        "creator_journey_texture"
+      ],
+      "asset_fingerprints": {
+        "creator_journey_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 56975,
+          "sha256": "1510bb913567d03495611f46137f5975b07bc7300c3cbb725e9b32f1017045f1"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 105465,
+        "sha256": "522c878e28661f138a2f26ac9604ab43437a6fcd00c5e117592a9f1103788abd"
+      },
+      "duration_seconds": 7.4
+    },
+    {
+      "id": "preview_3022b00bec50",
+      "template_ref": "field_notes_motion",
+      "template_id": "field_notes_motion",
+      "params": {
+        "title": "Phone, then the room",
+        "notes": [
+          "holding the phone",
+          "enjoying",
+          "some people keep recording"
+        ],
+        "motif": "loop"
+      },
+      "output": "previews/preview_3022b00bec50.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 10038,
+        "sha256": "11724c4ef32606785fb0fb195cd1cd76e6aff7bb41f33c49c632e7c998ced477"
+      },
+      "required_asset_ids": [
+        "personal_documentary_texture"
+      ],
+      "asset_fingerprints": {
+        "personal_documentary_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 28564,
+          "sha256": "973d5d15168dc474240dcb754b917cf165ea634e9e67fb13ad13f55a0c955b60"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 104908,
+        "sha256": "36c2df1af62c05094a484842e8ecfca7b80d4bc051431ac35f912d0bceba3de7"
+      },
+      "duration_seconds": 7.4
+    },
+    {
+      "id": "preview_460d49fd464a",
+      "template_ref": "contrast_board_motion",
+      "template_id": "contrast_board_motion",
+      "params": {
+        "title": "Somewhere in between",
+        "left_label": "always recording",
+        "right_label": "forgetting the camera",
+        "caption": "That middle is why it has been hard.",
+        "balance": 0.52
+      },
+      "output": "previews/preview_460d49fd464a.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 7983,
+        "sha256": "223dae036b86e704f968107d13568915b51282bef995f38a4110dc7e6071f263"
+      },
+      "required_asset_ids": [
+        "personal_documentary_texture"
+      ],
+      "asset_fingerprints": {
+        "personal_documentary_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 28564,
+          "sha256": "973d5d15168dc474240dcb754b917cf165ea634e9e67fb13ad13f55a0c955b60"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 117161,
+        "sha256": "8d888179d4f8f6e063225fc4212d3bd3c611d334a4d7bee02d14d007abad3c56"
+      },
+      "duration_seconds": 7.4
+    },
+    {
+      "id": "preview_99f496abfd0c",
+      "template_ref": "field_notes_motion",
+      "template_id": "field_notes_motion",
+      "params": {
+        "title": "The self-check",
+        "notes": [
+          "I look weird",
+          "give me one second",
+          "the take keeps going"
+        ],
+        "motif": "reset"
+      },
+      "output": "previews/preview_99f496abfd0c.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 10038,
+        "sha256": "11724c4ef32606785fb0fb195cd1cd76e6aff7bb41f33c49c632e7c998ced477"
+      },
+      "required_asset_ids": [
+        "personal_documentary_texture"
+      ],
+      "asset_fingerprints": {
+        "personal_documentary_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 28564,
+          "sha256": "973d5d15168dc474240dcb754b917cf165ea634e9e67fb13ad13f55a0c955b60"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 92162,
+        "sha256": "db98ca25a81643015896ea21c7854962f71cf7f81e7b95e457a908906b8ce74e"
+      },
+      "duration_seconds": 7.3
+    },
+    {
+      "id": "preview_38524bcfa0b3",
+      "template_ref": "time_capsule_motion",
+      "template_id": "time_capsule_motion",
+      "params": {
+        "title": "Take resumes",
+        "items": [
+          "lost that",
+          "felt stupid",
+          "starts again"
+        ],
+        "footer": "the cut stays part of the story",
+        "mode": "timeline gap"
+      },
+      "output": "previews/preview_38524bcfa0b3.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 8192,
+        "sha256": "9ac5e420fdbe7c5bfdfe616a1f30d697b0fbc27a6bbda2806a59c59f713f54bc"
+      },
+      "required_asset_ids": [
+        "personal_documentary_texture"
+      ],
+      "asset_fingerprints": {
+        "personal_documentary_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 28564,
+          "sha256": "973d5d15168dc474240dcb754b917cf165ea634e9e67fb13ad13f55a0c955b60"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 70383,
+        "sha256": "b9ec8e73ec025d7c35693e98d04e8ac8d3f3ad63edbd6dacfcfa9a3bd9baacee"
+      },
+      "duration_seconds": 7.3
+    },
+    {
+      "id": "preview_19f9e137c21d",
+      "template_ref": "kinetic_text_beat",
+      "template_id": "kinetic_text_beat",
+      "params": {
+        "text": "This is my take to create content this year.",
+        "label": "the attempt",
+        "accent": "#2f7d68"
+      },
+      "output": "previews/preview_19f9e137c21d.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 5129,
+        "sha256": "35abf7ef50c6e9fddbd46440ef9bca6fb14e74b1dded25fef01cd8f250aa4f10"
+      },
+      "required_asset_ids": [],
+      "asset_fingerprints": {},
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 248202,
+        "sha256": "819ecd8704762898292bf8e820aef798db8f002d6187993a039756631cc27c6d"
+      },
+      "duration_seconds": 7.3
+    },
+    {
+      "id": "preview_11aa8fb232f3",
+      "template_ref": "time_capsule_motion",
+      "template_id": "time_capsule_motion",
+      "params": {
+        "title": "What I can promise",
+        "items": [
+          "pure me",
+          "no selling",
+          "no scripted motivation"
+        ],
+        "footer": "honesty over performance",
+        "mode": "promise reveal"
+      },
+      "output": "previews/preview_11aa8fb232f3.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 8192,
+        "sha256": "9ac5e420fdbe7c5bfdfe616a1f30d697b0fbc27a6bbda2806a59c59f713f54bc"
+      },
+      "required_asset_ids": [
+        "personal_documentary_texture"
+      ],
+      "asset_fingerprints": {
+        "personal_documentary_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 28564,
+          "sha256": "973d5d15168dc474240dcb754b917cf165ea634e9e67fb13ad13f55a0c955b60"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 71377,
+        "sha256": "8fdd57e1e2fe3292389626866efbf002ff5d0ae4e0ef208309c48cdfe7c5f5cc"
+      },
+      "duration_seconds": 7.3
+    },
+    {
+      "id": "preview_896c78845d53",
+      "template_ref": "contrast_board_motion",
+      "template_id": "contrast_board_motion",
+      "params": {
+        "title": "No selling",
+        "left_label": "do this / do that",
+        "right_label": "what have I hidden?",
+        "caption": "The questions matter more than advice.",
+        "balance": 0.75
+      },
+      "output": "previews/preview_896c78845d53.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 7983,
+        "sha256": "223dae036b86e704f968107d13568915b51282bef995f38a4110dc7e6071f263"
+      },
+      "required_asset_ids": [
+        "personal_documentary_texture"
+      ],
+      "asset_fingerprints": {
+        "personal_documentary_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 28564,
+          "sha256": "973d5d15168dc474240dcb754b917cf165ea634e9e67fb13ad13f55a0c955b60"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 112616,
+        "sha256": "434871c33b0295eaa76555cb632b17184dcefef0e88bd5876db3d45a103fd055"
+      },
+      "duration_seconds": 7.3
+    },
+    {
+      "id": "preview_58a7cdf1b6b4",
+      "template_ref": "time_capsule_motion",
+      "template_id": "time_capsule_motion",
+      "params": {
+        "title": "Questions underneath",
+        "items": [
+          "What have I done?",
+          "Where do I get the energy?",
+          "What is my motivation?"
+        ],
+        "footer": "the journey has to answer these",
+        "mode": "question stack"
+      },
+      "output": "previews/preview_58a7cdf1b6b4.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 8192,
+        "sha256": "9ac5e420fdbe7c5bfdfe616a1f30d697b0fbc27a6bbda2806a59c59f713f54bc"
+      },
+      "required_asset_ids": [
+        "personal_documentary_texture"
+      ],
+      "asset_fingerprints": {
+        "personal_documentary_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 28564,
+          "sha256": "973d5d15168dc474240dcb754b917cf165ea634e9e67fb13ad13f55a0c955b60"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 87922,
+        "sha256": "f35a26b52551ec3d62d4e4ad39ef8fccc101588ddf90d8c2eaecbc8902501f15"
+      },
+      "duration_seconds": 7.3
+    },
+    {
+      "id": "preview_bc7f1fb0218d",
+      "template_ref": "kinetic_text_beat",
+      "template_id": "kinetic_text_beat",
+      "params": {
+        "text": "If that inspires you, I\u2019ll be the happiest person.",
+        "label": "not the goal, but a hope",
+        "accent": "#d28a4a"
+      },
+      "output": "previews/preview_bc7f1fb0218d.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 5129,
+        "sha256": "35abf7ef50c6e9fddbd46440ef9bca6fb14e74b1dded25fef01cd8f250aa4f10"
+      },
+      "required_asset_ids": [],
+      "asset_fingerprints": {},
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 257256,
+        "sha256": "5351644e4fd79c7454246f3a77e9203b0ac9cd1d38065d889b7c250ca0588fd4"
+      },
+      "duration_seconds": 7.3
+    },
+    {
+      "id": "preview_2d181f32c2d7",
+      "template_ref": "contrast_board_motion",
+      "template_id": "contrast_board_motion",
+      "params": {
+        "title": "No fake motivation",
+        "left_label": "you need to do this",
+        "right_label": "that\u2019s your journey",
+        "caption": "No one is being instructed here.",
+        "balance": 0.82
+      },
+      "output": "previews/preview_2d181f32c2d7.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 7983,
+        "sha256": "223dae036b86e704f968107d13568915b51282bef995f38a4110dc7e6071f263"
+      },
+      "required_asset_ids": [
+        "personal_documentary_texture"
+      ],
+      "asset_fingerprints": {
+        "personal_documentary_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 28564,
+          "sha256": "973d5d15168dc474240dcb754b917cf165ea634e9e67fb13ad13f55a0c955b60"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 117785,
+        "sha256": "4ab17e299e6c7ba2bbce51591fa8aef1c1fa41b840c7bf54f4534463e71d5ca4"
+      },
+      "duration_seconds": 7.3
+    },
+    {
+      "id": "preview_f01a4d63bdb8",
+      "template_ref": "animated_journey_map",
+      "template_id": "animated_journey_map",
+      "params": {
+        "title": "This is my journey",
+        "center_text": "document it now",
+        "stages": [
+          {
+            "label": "Put it out there",
+            "detail": "Share the attempt while it is happening."
+          },
+          {
+            "label": "Keep a record",
+            "detail": "Make something future self can return to."
+          },
+          {
+            "label": "No regrets later",
+            "detail": "Let the evidence exist."
+          }
+        ]
+      },
+      "output": "previews/preview_f01a4d63bdb8.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 8573,
+        "sha256": "a954cd579b573026aa1026018818d757abbb35004167d89481cce3018f8257e0"
+      },
+      "required_asset_ids": [
+        "creator_journey_texture"
+      ],
+      "asset_fingerprints": {
+        "creator_journey_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 56975,
+          "sha256": "1510bb913567d03495611f46137f5975b07bc7300c3cbb725e9b32f1017045f1"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 102266,
+        "sha256": "d34cb636e111ebac4e4d65f55237d005418e139e66e8a4821f3cf2a1544b57f4"
+      },
+      "duration_seconds": 7.3
+    },
+    {
+      "id": "preview_62238a4b6e52",
+      "template_ref": "time_capsule_motion",
+      "template_id": "time_capsule_motion",
+      "params": {
+        "title": "For future me",
+        "items": [
+          "young",
+          "energetic",
+          "no regrets"
+        ],
+        "footer": "a record to look back on",
+        "mode": "future archive"
+      },
+      "output": "previews/preview_62238a4b6e52.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 8192,
+        "sha256": "9ac5e420fdbe7c5bfdfe616a1f30d697b0fbc27a6bbda2806a59c59f713f54bc"
+      },
+      "required_asset_ids": [
+        "personal_documentary_texture"
+      ],
+      "asset_fingerprints": {
+        "personal_documentary_texture": {
+          "kind": "sha256_v1",
+          "size_bytes": 28564,
+          "sha256": "973d5d15168dc474240dcb754b917cf165ea634e9e67fb13ad13f55a0c955b60"
+        }
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 68415,
+        "sha256": "38d1cbe3e4c654be46163f87350b4604ab60572a3c3d2921dfa0c253a67efb56"
+      },
+      "duration_seconds": 7.3
+    },
+    {
+      "id": "preview_91d891955053",
+      "template_ref": "kinetic_text_beat",
+      "template_id": "kinetic_text_beat",
+      "params": {
+        "text": "See you around. Bye.",
+        "label": "closing note",
+        "accent": "#5c7cfa"
+      },
+      "output": "previews/preview_91d891955053.mp4",
+      "output_type": "mp4",
+      "status": "rendered",
+      "created_at": "2026-06-22T07:32:07Z",
+      "updated_at": "2026-06-22T07:32:07Z",
+      "template_version": "1.0.0",
+      "template_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 5129,
+        "sha256": "35abf7ef50c6e9fddbd46440ef9bca6fb14e74b1dded25fef01cd8f250aa4f10"
+      },
+      "required_asset_ids": [],
+      "asset_fingerprints": {},
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 185706,
+        "sha256": "aa2a06707d621faece47de2be0b5dbba159e014b17112b16e63a04ba24bcdaf3"
+      },
+      "duration_seconds": 5.524717
+    }
+  ],
+  "chunk_previews": [
+    {
+      "id": "chunk_preview_chunk_001",
+      "chunk_id": "chunk_001",
+      "output": "chunk-previews/chunk_001.png",
+      "manifest": "chunk-previews/chunk_001.json",
+      "visual_ids": [
+        "visual_c5179a907ada",
+        "visual_84be440c9f7e",
+        "visual_27981e6a00d2",
+        "visual_a389e96e1e21",
+        "visual_d360fceb2572",
+        "visual_7cd7e0efd1f4",
+        "visual_b866b5984fa0",
+        "visual_01dba8afe019",
+        "visual_f9dfad8ef4e3",
+        "visual_2e972dc0a2c0",
+        "visual_c4912c13450a",
+        "visual_3389bbee4b49",
+        "visual_d435902d5410",
+        "visual_01b223fa18fc",
+        "visual_aa425df633b5",
+        "visual_65d9a9c875c6",
+        "visual_d59bd4a11c3c",
+        "visual_f1a4bd786c0b",
+        "visual_5601ee7cf5f2",
+        "visual_b26cc5ac73a4"
+      ],
+      "preview_ids": [
+        "preview_bd31b2536e9c",
+        "preview_3fb18ed53419",
+        "preview_689646def0ac",
+        "preview_dd2929c83c0b",
+        "preview_7d27c6cd2222",
+        "preview_58a0cfa5ce22",
+        "preview_deba34dd25a5",
+        "preview_3022b00bec50",
+        "preview_460d49fd464a",
+        "preview_99f496abfd0c",
+        "preview_38524bcfa0b3",
+        "preview_19f9e137c21d",
+        "preview_11aa8fb232f3",
+        "preview_896c78845d53",
+        "preview_58a7cdf1b6b4",
+        "preview_bc7f1fb0218d",
+        "preview_2d181f32c2d7",
+        "preview_f01a4d63bdb8",
+        "preview_62238a4b6e52",
+        "preview_91d891955053"
+      ],
+      "status": "rendered",
+      "created_at": "2026-06-21T21:53:48Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    }
+  ],
+  "visual_intents": [
+    {
+      "id": "intent_5acc3b8ec982",
+      "chunk_id": "chunk_001",
+      "start": 0.0,
+      "end": 7.4,
+      "source_block_ids": [
+        "block_001",
+        "block_002"
+      ],
+      "intent_type": "animated_opening_hook",
+      "purpose": "Open at the true chunk start with a candid creator introduction and the two-year hesitation behind it.",
+      "content": {
+        "title": "Two years of trying",
+        "subtitle": "A private creator starts with honesty",
+        "tone": "private field notes"
+      },
+      "style_notes": "Candid, unsentimental, animated from the first frame.",
+      "visual_role": "hook",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.5,
+          7.4
+        ],
+        "transition_in": "cut",
+        "transition_out": "fade",
+        "animation_notes": "Immediate moving title reveal, accent sweep, and subtle background drift to establish an honest field-note tone."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "animated_opening_hook"
+      ],
+      "binding": {
+        "template_ref": "animated_opening_hook",
+        "template_id": "animated_opening_hook",
+        "params": {
+          "title": "Two years of trying",
+          "subtitle": "A private creator starts with honesty",
+          "tone": "private field notes"
+        }
+      },
+      "visual_id": "visual_c5179a907ada",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_7524b70ac82d",
+      "chunk_id": "chunk_001",
+      "start": 7.4,
+      "end": 14.8,
+      "source_block_ids": [
+        "block_003"
+      ],
+      "intent_type": "animated_confession_spiral",
+      "purpose": "Show the bedroom loop of recording, overwhelm, and not posting as a moving inner spiral.",
+      "content": {
+        "title": "The bedroom loop",
+        "notes": [
+          "recording stuff",
+          "overwhelmed",
+          "not posting"
+        ],
+        "motif": "spiral"
+      },
+      "style_notes": "Personal and claustrophobic without melodrama.",
+      "visual_role": "context",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "fade",
+        "transition_out": "slide",
+        "animation_notes": "Layer notebook fragments inward while a soft spiral line traces repeated attempts."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "field_notes_motion"
+      ],
+      "binding": {
+        "template_ref": "field_notes_motion",
+        "template_id": "field_notes_motion",
+        "params": {
+          "title": "The bedroom loop",
+          "notes": [
+            "recording stuff",
+            "overwhelmed",
+            "not posting"
+          ],
+          "motif": "spiral"
+        }
+      },
+      "visual_id": "visual_84be440c9f7e",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_1eb7b84b467e",
+      "chunk_id": "chunk_001",
+      "start": 14.8,
+      "end": 22.2,
+      "source_block_ids": [
+        "block_003",
+        "block_004"
+      ],
+      "intent_type": "animated_key_point",
+      "purpose": "Emphasize that trying has meant sitting with the material instead of publishing it.",
+      "content": {
+        "text": "trying meant recording, freezing, not posting",
+        "label": "honest context",
+        "accent": "#bf6a45"
+      },
+      "style_notes": "Plainspoken emphasis, no hype language.",
+      "visual_role": "emphasis",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "type_on",
+        "transition_out": "fade",
+        "animation_notes": "Kinetic words enter in staggered lines with a progress stroke across the bottom."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "kinetic_text_beat"
+      ],
+      "binding": {
+        "template_ref": "kinetic_text_beat",
+        "template_id": "kinetic_text_beat",
+        "params": {
+          "text": "trying meant recording, freezing, not posting",
+          "label": "honest context",
+          "accent": "#bf6a45"
+        }
+      },
+      "visual_id": "visual_27981e6a00d2",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_dbb641e176c4",
+      "chunk_id": "chunk_001",
+      "start": 22.2,
+      "end": 29.6,
+      "source_block_ids": [
+        "block_005",
+        "block_006"
+      ],
+      "intent_type": "animated_contrast_split",
+      "purpose": "Separate her approach from generic creator motivation content.",
+      "content": {
+        "title": "Not motivation content",
+        "left_label": "selling advice",
+        "right_label": "showing the real attempt",
+        "caption": "No performative pep talk."
+      },
+      "style_notes": "Restrained editorial contrast with a clear rejection of generic motivation.",
+      "visual_role": "contrast",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "slide",
+        "transition_out": "cut",
+        "animation_notes": "Two panels slide into tension: performance advice on one side, honest documenting on the other."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "contrast_board_motion"
+      ],
+      "binding": {
+        "template_ref": "contrast_board_motion",
+        "template_id": "contrast_board_motion",
+        "params": {
+          "title": "Not motivation content",
+          "left_label": "selling advice",
+          "right_label": "showing the real attempt",
+          "caption": "No performative pep talk.",
+          "balance": 0.72
+        }
+      },
+      "visual_id": "visual_a389e96e1e21",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_afa000680336",
+      "chunk_id": "chunk_001",
+      "start": 29.6,
+      "end": 37.0,
+      "source_block_ids": [
+        "block_007",
+        "block_008"
+      ],
+      "intent_type": "animated_boundary_scale",
+      "purpose": "Make the phrase about content not being everyone\u2019s cup of tea feel embodied and private.",
+      "content": {
+        "title": "Not everyone\u2019s cup of tea",
+        "notes": [
+          "posting is exposed",
+          "privacy pulls back",
+          "trying anyway"
+        ],
+        "motif": "scale"
+      },
+      "style_notes": "Sensitive, not comedic.",
+      "visual_role": "proof",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "fade",
+        "transition_out": "fade",
+        "animation_notes": "A careful scale moves between posting and privacy while note cards appear along the axis."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "field_notes_motion"
+      ],
+      "binding": {
+        "template_ref": "field_notes_motion",
+        "template_id": "field_notes_motion",
+        "params": {
+          "title": "Not everyone\u2019s cup of tea",
+          "notes": [
+            "posting is exposed",
+            "privacy pulls back",
+            "trying anyway"
+          ],
+          "motif": "scale"
+        }
+      },
+      "visual_id": "visual_d360fceb2572",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_759ccfcd5a2c",
+      "chunk_id": "chunk_001",
+      "start": 37.0,
+      "end": 44.4,
+      "source_block_ids": [
+        "block_009",
+        "block_010"
+      ],
+      "intent_type": "animated_quote",
+      "purpose": "Hold the central confession that this feels really hard for a private person.",
+      "content": {
+        "text": "I am a very private person. This feels really hard.",
+        "label": "the hard part",
+        "accent": "#7b5cff"
+      },
+      "style_notes": "Let the vulnerability land without clutter.",
+      "visual_role": "emphasis",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "type_on",
+        "transition_out": "fade",
+        "animation_notes": "Repeat emphasis words through kinetic type while the underline creeps forward."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "kinetic_text_beat"
+      ],
+      "binding": {
+        "template_ref": "kinetic_text_beat",
+        "template_id": "kinetic_text_beat",
+        "params": {
+          "text": "I am a very private person. This feels really hard.",
+          "label": "the hard part",
+          "accent": "#7b5cff"
+        }
+      },
+      "visual_id": "visual_7cd7e0efd1f4",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_09b87befbefb",
+      "chunk_id": "chunk_001",
+      "start": 44.4,
+      "end": 51.8,
+      "source_block_ids": [
+        "block_011",
+        "block_012",
+        "block_013"
+      ],
+      "intent_type": "animated_journey_map",
+      "purpose": "Map her relationship to documenting moments: loving capture, then returning to being present.",
+      "content": {
+        "title": "Loving the record",
+        "center_text": "capturing moments",
+        "stages": [
+          {
+            "label": "I love documenting",
+            "detail": "She is not rejecting the impulse."
+          },
+          {
+            "label": "Room moments",
+            "detail": "The camera comes out when people are having fun."
+          },
+          {
+            "label": "Then presence",
+            "detail": "Recording gives way to just being there."
+          }
+        ]
+      },
+      "style_notes": "Warm, observational, and personal.",
+      "visual_role": "context",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "slide",
+        "transition_out": "fade",
+        "animation_notes": "Path draws between staged cards as the center badge breathes subtly."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "animated_journey_map"
+      ],
+      "binding": {
+        "template_ref": "animated_journey_map",
+        "template_id": "animated_journey_map",
+        "params": {
+          "title": "Loving the record",
+          "center_text": "capturing moments",
+          "stages": [
+            {
+              "label": "I love documenting",
+              "detail": "She is not rejecting the impulse."
+            },
+            {
+              "label": "Room moments",
+              "detail": "The camera comes out when people are having fun."
+            },
+            {
+              "label": "Then presence",
+              "detail": "Recording gives way to just being there."
+            }
+          ]
+        }
+      },
+      "visual_id": "visual_b866b5984fa0",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_535d0be1a6af",
+      "chunk_id": "chunk_001",
+      "start": 51.8,
+      "end": 59.2,
+      "source_block_ids": [
+        "block_014",
+        "block_015"
+      ],
+      "intent_type": "animated_documenting_loop",
+      "purpose": "Visualize moving between holding the phone and enjoying the room.",
+      "content": {
+        "title": "Phone, then the room",
+        "notes": [
+          "holding the phone",
+          "enjoying",
+          "some people keep recording"
+        ],
+        "motif": "loop"
+      },
+      "style_notes": "Fluid motion, not a static list.",
+      "visual_role": "transition",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "fade",
+        "transition_out": "slide",
+        "animation_notes": "Loop cards orbit between camera-in-hand and present-in-room states."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "field_notes_motion"
+      ],
+      "binding": {
+        "template_ref": "field_notes_motion",
+        "template_id": "field_notes_motion",
+        "params": {
+          "title": "Phone, then the room",
+          "notes": [
+            "holding the phone",
+            "enjoying",
+            "some people keep recording"
+          ],
+          "motif": "loop"
+        }
+      },
+      "visual_id": "visual_01dba8afe019",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_ca37e2778893",
+      "chunk_id": "chunk_001",
+      "start": 59.2,
+      "end": 66.6,
+      "source_block_ids": [
+        "block_015",
+        "block_016",
+        "block_017"
+      ],
+      "intent_type": "animated_private_public_scale",
+      "purpose": "Show her position between people who constantly record and people who forget the camera.",
+      "content": {
+        "title": "Somewhere in between",
+        "left_label": "always recording",
+        "right_label": "forgetting the camera",
+        "caption": "That middle is why it has been hard."
+      },
+      "style_notes": "Empathetic proof point for the creator\u2019s hesitation.",
+      "visual_role": "proof",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "slide",
+        "transition_out": "fade",
+        "animation_notes": "A marker glides across a two-sided board and settles in the uneasy middle."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "contrast_board_motion"
+      ],
+      "binding": {
+        "template_ref": "contrast_board_motion",
+        "template_id": "contrast_board_motion",
+        "params": {
+          "title": "Somewhere in between",
+          "left_label": "always recording",
+          "right_label": "forgetting the camera",
+          "caption": "That middle is why it has been hard.",
+          "balance": 0.52
+        }
+      },
+      "visual_id": "visual_f9dfad8ef4e3",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_7823df072b5d",
+      "chunk_id": "chunk_001",
+      "start": 66.6,
+      "end": 73.9,
+      "source_block_ids": [
+        "block_018",
+        "block_019"
+      ],
+      "intent_type": "animated_self_check",
+      "purpose": "Treat the awkward self-conscious interruption as part of the authentic record.",
+      "content": {
+        "title": "The self-check",
+        "notes": [
+          "I look weird",
+          "give me one second",
+          "the take keeps going"
+        ],
+        "motif": "reset"
+      },
+      "style_notes": "Handle the moment gently and without ridicule.",
+      "visual_role": "transition",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.6,
+          7.3
+        ],
+        "transition_in": "cut",
+        "transition_out": "fade",
+        "animation_notes": "Note cards jitter into place, pause, then reset as if she is stepping away for a second."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "field_notes_motion"
+      ],
+      "binding": {
+        "template_ref": "field_notes_motion",
+        "template_id": "field_notes_motion",
+        "params": {
+          "title": "The self-check",
+          "notes": [
+            "I look weird",
+            "give me one second",
+            "the take keeps going"
+          ],
+          "motif": "reset"
+        }
+      },
+      "visual_id": "visual_2e972dc0a2c0",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_421edc05adc6",
+      "chunk_id": "chunk_001",
+      "start": 73.9,
+      "end": 81.2,
+      "source_block_ids": [
+        "block_020"
+      ],
+      "intent_type": "animated_time_gap",
+      "purpose": "Bridge the cut and recovery after she says she lost that moment.",
+      "content": {
+        "title": "Take resumes",
+        "items": [
+          "lost that",
+          "felt stupid",
+          "starts again"
+        ],
+        "footer": "the cut stays part of the story"
+      },
+      "style_notes": "A transparent edit marker, not a flashy transition.",
+      "visual_role": "transition",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.6,
+          7.3
+        ],
+        "transition_in": "fade",
+        "transition_out": "slide",
+        "animation_notes": "Timeline ticks advance through a gap and snap back into the take."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "time_capsule_motion"
+      ],
+      "binding": {
+        "template_ref": "time_capsule_motion",
+        "template_id": "time_capsule_motion",
+        "params": {
+          "title": "Take resumes",
+          "items": [
+            "lost that",
+            "felt stupid",
+            "starts again"
+          ],
+          "footer": "the cut stays part of the story",
+          "mode": "timeline gap"
+        }
+      },
+      "visual_id": "visual_c4912c13450a",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_25b8331f8b48",
+      "chunk_id": "chunk_001",
+      "start": 81.2,
+      "end": 88.5,
+      "source_block_ids": [
+        "block_021"
+      ],
+      "intent_type": "animated_key_point",
+      "purpose": "Declare the actual project: creating content this year as a documented attempt.",
+      "content": {
+        "text": "This is my take to create content this year.",
+        "label": "the attempt",
+        "accent": "#2f7d68"
+      },
+      "style_notes": "A clear pivot from hesitation to commitment.",
+      "visual_role": "emphasis",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "type_on",
+        "transition_out": "fade",
+        "animation_notes": "Text enters in three decisive beats with moving accent bars."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "kinetic_text_beat"
+      ],
+      "binding": {
+        "template_ref": "kinetic_text_beat",
+        "template_id": "kinetic_text_beat",
+        "params": {
+          "text": "This is my take to create content this year.",
+          "label": "the attempt",
+          "accent": "#2f7d68"
+        }
+      },
+      "visual_id": "visual_3389bbee4b49",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_6572c1716ef5",
+      "chunk_id": "chunk_001",
+      "start": 88.5,
+      "end": 95.8,
+      "source_block_ids": [
+        "block_022",
+        "block_023"
+      ],
+      "intent_type": "animated_promise_reveal",
+      "purpose": "Reveal the promise of the channel: pure me, with no selling.",
+      "content": {
+        "title": "What I can promise",
+        "items": [
+          "pure me",
+          "no selling",
+          "no scripted motivation"
+        ],
+        "footer": "honesty over performance"
+      },
+      "style_notes": "Sincere and sparse, but animated.",
+      "visual_role": "proof",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "fade",
+        "transition_out": "slide",
+        "animation_notes": "Promise items appear one at a time like entries being pinned into a capsule."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "time_capsule_motion"
+      ],
+      "binding": {
+        "template_ref": "time_capsule_motion",
+        "template_id": "time_capsule_motion",
+        "params": {
+          "title": "What I can promise",
+          "items": [
+            "pure me",
+            "no selling",
+            "no scripted motivation"
+          ],
+          "footer": "honesty over performance",
+          "mode": "promise reveal"
+        }
+      },
+      "visual_id": "visual_d435902d5410",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_4eb1d029ec4e",
+      "chunk_id": "chunk_001",
+      "start": 95.8,
+      "end": 103.1,
+      "source_block_ids": [
+        "block_023",
+        "block_024",
+        "block_025"
+      ],
+      "intent_type": "animated_anti_sales_meter",
+      "purpose": "Push back against the fake helpfulness of 'you can do this' advice.",
+      "content": {
+        "title": "No selling",
+        "left_label": "do this / do that",
+        "right_label": "what have I hidden?",
+        "caption": "The questions matter more than advice."
+      },
+      "style_notes": "Make the refusal visual and specific.",
+      "visual_role": "contrast",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "slide",
+        "transition_out": "fade",
+        "animation_notes": "The left panel drains while the right panel gains emphasis around honest questions."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "contrast_board_motion"
+      ],
+      "binding": {
+        "template_ref": "contrast_board_motion",
+        "template_id": "contrast_board_motion",
+        "params": {
+          "title": "No selling",
+          "left_label": "do this / do that",
+          "right_label": "what have I hidden?",
+          "caption": "The questions matter more than advice.",
+          "balance": 0.75
+        }
+      },
+      "visual_id": "visual_01b223fa18fc",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_43437f08402c",
+      "chunk_id": "chunk_001",
+      "start": 103.1,
+      "end": 110.4,
+      "source_block_ids": [
+        "block_026",
+        "block_027",
+        "block_028"
+      ],
+      "intent_type": "animated_question_stack",
+      "purpose": "Collect the questions she wants the journey to answer: what she has done, energy, motivation.",
+      "content": {
+        "title": "Questions underneath",
+        "items": [
+          "What have I done?",
+          "Where do I get the energy?",
+          "What is my motivation?"
+        ],
+        "footer": "the journey has to answer these"
+      },
+      "style_notes": "Curious rather than explanatory.",
+      "visual_role": "context",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "type_on",
+        "transition_out": "slide",
+        "animation_notes": "Question cards rise in a stack while the current card is highlighted."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "time_capsule_motion"
+      ],
+      "binding": {
+        "template_ref": "time_capsule_motion",
+        "template_id": "time_capsule_motion",
+        "params": {
+          "title": "Questions underneath",
+          "items": [
+            "What have I done?",
+            "Where do I get the energy?",
+            "What is my motivation?"
+          ],
+          "footer": "the journey has to answer these",
+          "mode": "question stack"
+        }
+      },
+      "visual_id": "visual_aa425df633b5",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_3d3934d7a310",
+      "chunk_id": "chunk_001",
+      "start": 110.4,
+      "end": 117.7,
+      "source_block_ids": [
+        "block_029",
+        "block_030"
+      ],
+      "intent_type": "animated_quote",
+      "purpose": "Hold the modest hope that if the journey inspires someone, that would be enough.",
+      "content": {
+        "text": "If that inspires you, I\u2019ll be the happiest person.",
+        "label": "not the goal, but a hope",
+        "accent": "#d28a4a"
+      },
+      "style_notes": "Keep the hope secondary to honesty.",
+      "visual_role": "emphasis",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "fade",
+        "transition_out": "fade",
+        "animation_notes": "Quote line types on gently with a small moving highlight, then settles."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "kinetic_text_beat"
+      ],
+      "binding": {
+        "template_ref": "kinetic_text_beat",
+        "template_id": "kinetic_text_beat",
+        "params": {
+          "text": "If that inspires you, I\u2019ll be the happiest person.",
+          "label": "not the goal, but a hope",
+          "accent": "#d28a4a"
+        }
+      },
+      "visual_id": "visual_65d9a9c875c6",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_49c0a0da6c58",
+      "chunk_id": "chunk_001",
+      "start": 117.7,
+      "end": 125.0,
+      "source_block_ids": [
+        "block_030",
+        "block_031",
+        "block_032",
+        "block_033",
+        "block_034"
+      ],
+      "intent_type": "animated_no_fake_motivation",
+      "purpose": "Make the anti-motivation stance explicit: no fake instructions, no forced journey.",
+      "content": {
+        "title": "No fake motivation",
+        "left_label": "you need to do this",
+        "right_label": "that\u2019s your journey",
+        "caption": "No one is being instructed here."
+      },
+      "style_notes": "Firm, clear, not preachy.",
+      "visual_role": "contrast",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "slide",
+        "transition_out": "cut",
+        "animation_notes": "Cross out command phrases while the personal-journey side steadies."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "contrast_board_motion"
+      ],
+      "binding": {
+        "template_ref": "contrast_board_motion",
+        "template_id": "contrast_board_motion",
+        "params": {
+          "title": "No fake motivation",
+          "left_label": "you need to do this",
+          "right_label": "that\u2019s your journey",
+          "caption": "No one is being instructed here.",
+          "balance": 0.82
+        }
+      },
+      "visual_id": "visual_d59bd4a11c3c",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_27463d8837c3",
+      "chunk_id": "chunk_001",
+      "start": 125.0,
+      "end": 132.3,
+      "source_block_ids": [
+        "block_035",
+        "block_036"
+      ],
+      "intent_type": "animated_journey_map",
+      "purpose": "Reconnect her personal journey to the long-term reason for documenting it.",
+      "content": {
+        "title": "This is my journey",
+        "center_text": "document it now",
+        "stages": [
+          {
+            "label": "Put it out there",
+            "detail": "Share the attempt while it is happening."
+          },
+          {
+            "label": "Keep a record",
+            "detail": "Make something future self can return to."
+          },
+          {
+            "label": "No regrets later",
+            "detail": "Let the evidence exist."
+          }
+        ]
+      },
+      "style_notes": "Recap with forward motion.",
+      "visual_role": "recap",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "fade",
+        "transition_out": "slide",
+        "animation_notes": "Map redraws from present attempt toward future self, with staged cards appearing in sequence."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "animated_journey_map"
+      ],
+      "binding": {
+        "template_ref": "animated_journey_map",
+        "template_id": "animated_journey_map",
+        "params": {
+          "title": "This is my journey",
+          "center_text": "document it now",
+          "stages": [
+            {
+              "label": "Put it out there",
+              "detail": "Share the attempt while it is happening."
+            },
+            {
+              "label": "Keep a record",
+              "detail": "Make something future self can return to."
+            },
+            {
+              "label": "No regrets later",
+              "detail": "Let the evidence exist."
+            }
+          ]
+        }
+      },
+      "visual_id": "visual_f1a4bd786c0b",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_87c61c9bd3c3",
+      "chunk_id": "chunk_001",
+      "start": 132.3,
+      "end": 139.6,
+      "source_block_ids": [
+        "block_036"
+      ],
+      "intent_type": "animated_future_archive",
+      "purpose": "Visualize the 50-year-old future self looking back at this younger version without regret.",
+      "content": {
+        "title": "For future me",
+        "items": [
+          "young",
+          "energetic",
+          "no regrets"
+        ],
+        "footer": "a record to look back on"
+      },
+      "style_notes": "Reflective, not sentimental overload.",
+      "visual_role": "recap",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "slide",
+        "transition_out": "fade",
+        "animation_notes": "Archive cards sweep from now to future, then lock into a keepsake timeline."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "time_capsule_motion"
+      ],
+      "binding": {
+        "template_ref": "time_capsule_motion",
+        "template_id": "time_capsule_motion",
+        "params": {
+          "title": "For future me",
+          "items": [
+            "young",
+            "energetic",
+            "no regrets"
+          ],
+          "footer": "a record to look back on",
+          "mode": "future archive"
+        }
+      },
+      "visual_id": "visual_5601ee7cf5f2",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    },
+    {
+      "id": "intent_c0a9b2c09dd9",
+      "chunk_id": "chunk_001",
+      "start": 139.6,
+      "end": 145.124717,
+      "source_block_ids": [
+        "block_036",
+        "block_037",
+        "block_038"
+      ],
+      "intent_type": "kinetic_text_beat",
+      "purpose": "Close with a short animated goodbye that keeps the direct-to-camera intimacy.",
+      "content": {
+        "text": "See you around. Bye.",
+        "label": "closing note",
+        "accent": "#5c7cfa"
+      },
+      "style_notes": "Short, human, and uncluttered.",
+      "visual_role": "outro",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          2.75,
+          5.524717
+        ],
+        "transition_in": "type_on",
+        "transition_out": "fade",
+        "animation_notes": "Final line types on, accent completes, and motion fades cleanly before the chunk end."
+      },
+      "status": "bound",
+      "candidate_template_ids": [
+        "kinetic_text_beat"
+      ],
+      "binding": {
+        "template_ref": "kinetic_text_beat",
+        "template_id": "kinetic_text_beat",
+        "params": {
+          "text": "See you around. Bye.",
+          "label": "closing note",
+          "accent": "#5c7cfa"
+        }
+      },
+      "visual_id": "visual_b26cc5ac73a4",
+      "planner": "codex_v1",
+      "created_at": "2026-06-22T07:16:54Z",
+      "updated_at": "2026-06-22T07:23:24Z"
+    }
+  ],
+  "visuals": [
+    {
+      "id": "visual_c5179a907ada",
+      "template_ref": "animated_opening_hook",
+      "template_id": "animated_opening_hook",
+      "params": {
+        "title": "Two years of trying",
+        "subtitle": "A private creator starts with honesty",
+        "tone": "private field notes"
+      },
+      "start": 0.0,
+      "end": 7.4,
+      "status": "previewed",
+      "preview_id": "preview_bd31b2536e9c",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_5acc3b8ec982",
+      "visual_role": "hook",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.5,
+          7.4
+        ],
+        "transition_in": "cut",
+        "transition_out": "fade",
+        "animation_notes": "Immediate moving title reveal, accent sweep, and subtle background drift to establish an honest field-note tone."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_84be440c9f7e",
+      "template_ref": "field_notes_motion",
+      "template_id": "field_notes_motion",
+      "params": {
+        "title": "The bedroom loop",
+        "notes": [
+          "recording stuff",
+          "overwhelmed",
+          "not posting"
+        ],
+        "motif": "spiral"
+      },
+      "start": 7.4,
+      "end": 14.8,
+      "status": "previewed",
+      "preview_id": "preview_3fb18ed53419",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_7524b70ac82d",
+      "visual_role": "context",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "fade",
+        "transition_out": "slide",
+        "animation_notes": "Layer notebook fragments inward while a soft spiral line traces repeated attempts."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_27981e6a00d2",
+      "template_ref": "kinetic_text_beat",
+      "template_id": "kinetic_text_beat",
+      "params": {
+        "text": "trying meant recording, freezing, not posting",
+        "label": "honest context",
+        "accent": "#bf6a45"
+      },
+      "start": 14.8,
+      "end": 22.2,
+      "status": "previewed",
+      "preview_id": "preview_689646def0ac",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_1eb7b84b467e",
+      "visual_role": "emphasis",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "type_on",
+        "transition_out": "fade",
+        "animation_notes": "Kinetic words enter in staggered lines with a progress stroke across the bottom."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_a389e96e1e21",
+      "template_ref": "contrast_board_motion",
+      "template_id": "contrast_board_motion",
+      "params": {
+        "title": "Not motivation content",
+        "left_label": "selling advice",
+        "right_label": "showing the real attempt",
+        "caption": "No performative pep talk.",
+        "balance": 0.72
+      },
+      "start": 22.2,
+      "end": 29.6,
+      "status": "previewed",
+      "preview_id": "preview_dd2929c83c0b",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_dbb641e176c4",
+      "visual_role": "contrast",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "slide",
+        "transition_out": "cut",
+        "animation_notes": "Two panels slide into tension: performance advice on one side, honest documenting on the other."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_d360fceb2572",
+      "template_ref": "field_notes_motion",
+      "template_id": "field_notes_motion",
+      "params": {
+        "title": "Not everyone\u2019s cup of tea",
+        "notes": [
+          "posting is exposed",
+          "privacy pulls back",
+          "trying anyway"
+        ],
+        "motif": "scale"
+      },
+      "start": 29.6,
+      "end": 37.0,
+      "status": "previewed",
+      "preview_id": "preview_7d27c6cd2222",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_afa000680336",
+      "visual_role": "proof",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "fade",
+        "transition_out": "fade",
+        "animation_notes": "A careful scale moves between posting and privacy while note cards appear along the axis."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_7cd7e0efd1f4",
+      "template_ref": "kinetic_text_beat",
+      "template_id": "kinetic_text_beat",
+      "params": {
+        "text": "I am a very private person. This feels really hard.",
+        "label": "the hard part",
+        "accent": "#7b5cff"
+      },
+      "start": 37.0,
+      "end": 44.4,
+      "status": "previewed",
+      "preview_id": "preview_58a0cfa5ce22",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_759ccfcd5a2c",
+      "visual_role": "emphasis",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "type_on",
+        "transition_out": "fade",
+        "animation_notes": "Repeat emphasis words through kinetic type while the underline creeps forward."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_b866b5984fa0",
+      "template_ref": "animated_journey_map",
+      "template_id": "animated_journey_map",
+      "params": {
+        "title": "Loving the record",
+        "center_text": "capturing moments",
+        "stages": [
+          {
+            "label": "I love documenting",
+            "detail": "She is not rejecting the impulse."
+          },
+          {
+            "label": "Room moments",
+            "detail": "The camera comes out when people are having fun."
+          },
+          {
+            "label": "Then presence",
+            "detail": "Recording gives way to just being there."
+          }
+        ]
+      },
+      "start": 44.4,
+      "end": 51.8,
+      "status": "previewed",
+      "preview_id": "preview_deba34dd25a5",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_09b87befbefb",
+      "visual_role": "context",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "slide",
+        "transition_out": "fade",
+        "animation_notes": "Path draws between staged cards as the center badge breathes subtly."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_01dba8afe019",
+      "template_ref": "field_notes_motion",
+      "template_id": "field_notes_motion",
+      "params": {
+        "title": "Phone, then the room",
+        "notes": [
+          "holding the phone",
+          "enjoying",
+          "some people keep recording"
+        ],
+        "motif": "loop"
+      },
+      "start": 51.8,
+      "end": 59.2,
+      "status": "previewed",
+      "preview_id": "preview_3022b00bec50",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_535d0be1a6af",
+      "visual_role": "transition",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "fade",
+        "transition_out": "slide",
+        "animation_notes": "Loop cards orbit between camera-in-hand and present-in-room states."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_f9dfad8ef4e3",
+      "template_ref": "contrast_board_motion",
+      "template_id": "contrast_board_motion",
+      "params": {
+        "title": "Somewhere in between",
+        "left_label": "always recording",
+        "right_label": "forgetting the camera",
+        "caption": "That middle is why it has been hard.",
+        "balance": 0.52
+      },
+      "start": 59.2,
+      "end": 66.6,
+      "status": "previewed",
+      "preview_id": "preview_460d49fd464a",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_ca37e2778893",
+      "visual_role": "proof",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.7,
+          7.4
+        ],
+        "transition_in": "slide",
+        "transition_out": "fade",
+        "animation_notes": "A marker glides across a two-sided board and settles in the uneasy middle."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_2e972dc0a2c0",
+      "template_ref": "field_notes_motion",
+      "template_id": "field_notes_motion",
+      "params": {
+        "title": "The self-check",
+        "notes": [
+          "I look weird",
+          "give me one second",
+          "the take keeps going"
+        ],
+        "motif": "reset"
+      },
+      "start": 66.6,
+      "end": 73.9,
+      "status": "previewed",
+      "preview_id": "preview_99f496abfd0c",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_7823df072b5d",
+      "visual_role": "transition",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.6,
+          7.3
+        ],
+        "transition_in": "cut",
+        "transition_out": "fade",
+        "animation_notes": "Note cards jitter into place, pause, then reset as if she is stepping away for a second."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_c4912c13450a",
+      "template_ref": "time_capsule_motion",
+      "template_id": "time_capsule_motion",
+      "params": {
+        "title": "Take resumes",
+        "items": [
+          "lost that",
+          "felt stupid",
+          "starts again"
+        ],
+        "footer": "the cut stays part of the story",
+        "mode": "timeline gap"
+      },
+      "start": 73.9,
+      "end": 81.2,
+      "status": "previewed",
+      "preview_id": "preview_38524bcfa0b3",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_421edc05adc6",
+      "visual_role": "transition",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.6,
+          7.3
+        ],
+        "transition_in": "fade",
+        "transition_out": "slide",
+        "animation_notes": "Timeline ticks advance through a gap and snap back into the take."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_3389bbee4b49",
+      "template_ref": "kinetic_text_beat",
+      "template_id": "kinetic_text_beat",
+      "params": {
+        "text": "This is my take to create content this year.",
+        "label": "the attempt",
+        "accent": "#2f7d68"
+      },
+      "start": 81.2,
+      "end": 88.5,
+      "status": "previewed",
+      "preview_id": "preview_19f9e137c21d",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_25b8331f8b48",
+      "visual_role": "emphasis",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "type_on",
+        "transition_out": "fade",
+        "animation_notes": "Text enters in three decisive beats with moving accent bars."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_d435902d5410",
+      "template_ref": "time_capsule_motion",
+      "template_id": "time_capsule_motion",
+      "params": {
+        "title": "What I can promise",
+        "items": [
+          "pure me",
+          "no selling",
+          "no scripted motivation"
+        ],
+        "footer": "honesty over performance",
+        "mode": "promise reveal"
+      },
+      "start": 88.5,
+      "end": 95.8,
+      "status": "previewed",
+      "preview_id": "preview_11aa8fb232f3",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_6572c1716ef5",
+      "visual_role": "proof",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "fade",
+        "transition_out": "slide",
+        "animation_notes": "Promise items appear one at a time like entries being pinned into a capsule."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_01b223fa18fc",
+      "template_ref": "contrast_board_motion",
+      "template_id": "contrast_board_motion",
+      "params": {
+        "title": "No selling",
+        "left_label": "do this / do that",
+        "right_label": "what have I hidden?",
+        "caption": "The questions matter more than advice.",
+        "balance": 0.75
+      },
+      "start": 95.8,
+      "end": 103.1,
+      "status": "previewed",
+      "preview_id": "preview_896c78845d53",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_4eb1d029ec4e",
+      "visual_role": "contrast",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "slide",
+        "transition_out": "fade",
+        "animation_notes": "The left panel drains while the right panel gains emphasis around honest questions."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_aa425df633b5",
+      "template_ref": "time_capsule_motion",
+      "template_id": "time_capsule_motion",
+      "params": {
+        "title": "Questions underneath",
+        "items": [
+          "What have I done?",
+          "Where do I get the energy?",
+          "What is my motivation?"
+        ],
+        "footer": "the journey has to answer these",
+        "mode": "question stack"
+      },
+      "start": 103.1,
+      "end": 110.4,
+      "status": "previewed",
+      "preview_id": "preview_58a7cdf1b6b4",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_43437f08402c",
+      "visual_role": "context",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "type_on",
+        "transition_out": "slide",
+        "animation_notes": "Question cards rise in a stack while the current card is highlighted."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_65d9a9c875c6",
+      "template_ref": "kinetic_text_beat",
+      "template_id": "kinetic_text_beat",
+      "params": {
+        "text": "If that inspires you, I\u2019ll be the happiest person.",
+        "label": "not the goal, but a hope",
+        "accent": "#d28a4a"
+      },
+      "start": 110.4,
+      "end": 117.7,
+      "status": "previewed",
+      "preview_id": "preview_bc7f1fb0218d",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_3d3934d7a310",
+      "visual_role": "emphasis",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "fade",
+        "transition_out": "fade",
+        "animation_notes": "Quote line types on gently with a small moving highlight, then settles."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_d59bd4a11c3c",
+      "template_ref": "contrast_board_motion",
+      "template_id": "contrast_board_motion",
+      "params": {
+        "title": "No fake motivation",
+        "left_label": "you need to do this",
+        "right_label": "that\u2019s your journey",
+        "caption": "No one is being instructed here.",
+        "balance": 0.82
+      },
+      "start": 117.7,
+      "end": 125.0,
+      "status": "previewed",
+      "preview_id": "preview_2d181f32c2d7",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_49c0a0da6c58",
+      "visual_role": "contrast",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "slide",
+        "transition_out": "cut",
+        "animation_notes": "Cross out command phrases while the personal-journey side steadies."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_f1a4bd786c0b",
+      "template_ref": "animated_journey_map",
+      "template_id": "animated_journey_map",
+      "params": {
+        "title": "This is my journey",
+        "center_text": "document it now",
+        "stages": [
+          {
+            "label": "Put it out there",
+            "detail": "Share the attempt while it is happening."
+          },
+          {
+            "label": "Keep a record",
+            "detail": "Make something future self can return to."
+          },
+          {
+            "label": "No regrets later",
+            "detail": "Let the evidence exist."
+          }
+        ]
+      },
+      "start": 125.0,
+      "end": 132.3,
+      "status": "previewed",
+      "preview_id": "preview_f01a4d63bdb8",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_27463d8837c3",
+      "visual_role": "recap",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "fade",
+        "transition_out": "slide",
+        "animation_notes": "Map redraws from present attempt toward future self, with staged cards appearing in sequence."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_5601ee7cf5f2",
+      "template_ref": "time_capsule_motion",
+      "template_id": "time_capsule_motion",
+      "params": {
+        "title": "For future me",
+        "items": [
+          "young",
+          "energetic",
+          "no regrets"
+        ],
+        "footer": "a record to look back on",
+        "mode": "future archive"
+      },
+      "start": 132.3,
+      "end": 139.6,
+      "status": "previewed",
+      "preview_id": "preview_62238a4b6e52",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_87c61c9bd3c3",
+      "visual_role": "recap",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          3.65,
+          7.3
+        ],
+        "transition_in": "slide",
+        "transition_out": "fade",
+        "animation_notes": "Archive cards sweep from now to future, then lock into a keepsake timeline."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    },
+    {
+      "id": "visual_b26cc5ac73a4",
+      "template_ref": "kinetic_text_beat",
+      "template_id": "kinetic_text_beat",
+      "params": {
+        "text": "See you around. Bye.",
+        "label": "closing note",
+        "accent": "#5c7cfa"
+      },
+      "start": 139.6,
+      "end": 145.124717,
+      "status": "previewed",
+      "preview_id": "preview_91d891955053",
+      "chunk_id": "chunk_001",
+      "planner": "codex_v1",
+      "intent_id": "intent_c0a9b2c09dd9",
+      "visual_role": "outro",
+      "motion": {
+        "preferred_output_type": "mp4",
+        "beats": [
+          0.0,
+          2.75,
+          5.524717
+        ],
+        "transition_in": "type_on",
+        "transition_out": "fade",
+        "animation_notes": "Final line types on, accent completes, and motion fades cleanly before the chunk end."
+      },
+      "created_at": "2026-06-22T07:23:24Z",
+      "updated_at": "2026-06-22T07:32:07Z"
+    }
+  ],
+  "renders": {
+    "chunks": {
+      "chunk_001": {
+        "path": "renders/chunks/chunk_001.mp4",
+        "chunk_id": "chunk_001",
+        "source": "../../inputs/Neha_much/VID-20260112-WA0002.mp4",
+        "source_fingerprint": {
+          "kind": "stat_v1",
+          "size_bytes": 23411621,
+          "modified_ns": 1770478007128229100
+        },
+        "duration_seconds": 145.124717,
+        "visual_ids": [
+          "visual_c5179a907ada",
+          "visual_84be440c9f7e",
+          "visual_27981e6a00d2",
+          "visual_a389e96e1e21",
+          "visual_d360fceb2572",
+          "visual_7cd7e0efd1f4",
+          "visual_b866b5984fa0",
+          "visual_01dba8afe019",
+          "visual_f9dfad8ef4e3",
+          "visual_2e972dc0a2c0",
+          "visual_c4912c13450a",
+          "visual_3389bbee4b49",
+          "visual_d435902d5410",
+          "visual_01b223fa18fc",
+          "visual_aa425df633b5",
+          "visual_65d9a9c875c6",
+          "visual_d59bd4a11c3c",
+          "visual_f1a4bd786c0b",
+          "visual_5601ee7cf5f2",
+          "visual_b26cc5ac73a4"
+        ],
+        "preview_ids": [
+          "preview_bd31b2536e9c",
+          "preview_3fb18ed53419",
+          "preview_689646def0ac",
+          "preview_dd2929c83c0b",
+          "preview_7d27c6cd2222",
+          "preview_58a0cfa5ce22",
+          "preview_deba34dd25a5",
+          "preview_3022b00bec50",
+          "preview_460d49fd464a",
+          "preview_99f496abfd0c",
+          "preview_38524bcfa0b3",
+          "preview_19f9e137c21d",
+          "preview_11aa8fb232f3",
+          "preview_896c78845d53",
+          "preview_58a7cdf1b6b4",
+          "preview_bc7f1fb0218d",
+          "preview_2d181f32c2d7",
+          "preview_f01a4d63bdb8",
+          "preview_62238a4b6e52",
+          "preview_91d891955053"
+        ],
+        "visual_plan_fingerprint": {
+          "kind": "sha256_v1",
+          "size_bytes": 12314,
+          "sha256": "723d2355ec8bd5d0a71f141e3f8f3b9a82437afbf214a88b44c1ee904920c346"
+        },
+        "preview_fingerprints": {
+          "preview_bd31b2536e9c": {
+            "kind": "sha256_v1",
+            "size_bytes": 438447,
+            "sha256": "d3665b74f3e4bc7a2764450d9f9f8be07afe1cffa3bc6bf3d8cccda7668739c1"
+          },
+          "preview_3fb18ed53419": {
+            "kind": "sha256_v1",
+            "size_bytes": 89326,
+            "sha256": "02582acadf86c3eac4d976c0a0e3fc66069c2356f286889b4b1dc7be1d8c8509"
+          },
+          "preview_689646def0ac": {
+            "kind": "sha256_v1",
+            "size_bytes": 256046,
+            "sha256": "19017adbb3e09e80bd1ad51c1ad1934b89308a89c0a5214ca747467e02d0d88a"
+          },
+          "preview_dd2929c83c0b": {
+            "kind": "sha256_v1",
+            "size_bytes": 114442,
+            "sha256": "ff460c20c964d77ccafd246ea2b036e525b16d7651b64fe35d1ecad142ed453c"
+          },
+          "preview_7d27c6cd2222": {
+            "kind": "sha256_v1",
+            "size_bytes": 89734,
+            "sha256": "ff5251e8b4f5ee9fde7e2d3d3713192ae4bce0d476130e6a3590950ffdab87a8"
+          },
+          "preview_58a0cfa5ce22": {
+            "kind": "sha256_v1",
+            "size_bytes": 256019,
+            "sha256": "3c8517f3745dddb5f7d133476222dd2dc07768efe2917d97c52560093d56755b"
+          },
+          "preview_deba34dd25a5": {
+            "kind": "sha256_v1",
+            "size_bytes": 105465,
+            "sha256": "522c878e28661f138a2f26ac9604ab43437a6fcd00c5e117592a9f1103788abd"
+          },
+          "preview_3022b00bec50": {
+            "kind": "sha256_v1",
+            "size_bytes": 104908,
+            "sha256": "36c2df1af62c05094a484842e8ecfca7b80d4bc051431ac35f912d0bceba3de7"
+          },
+          "preview_460d49fd464a": {
+            "kind": "sha256_v1",
+            "size_bytes": 117161,
+            "sha256": "8d888179d4f8f6e063225fc4212d3bd3c611d334a4d7bee02d14d007abad3c56"
+          },
+          "preview_99f496abfd0c": {
+            "kind": "sha256_v1",
+            "size_bytes": 92162,
+            "sha256": "db98ca25a81643015896ea21c7854962f71cf7f81e7b95e457a908906b8ce74e"
+          },
+          "preview_38524bcfa0b3": {
+            "kind": "sha256_v1",
+            "size_bytes": 70383,
+            "sha256": "b9ec8e73ec025d7c35693e98d04e8ac8d3f3ad63edbd6dacfcfa9a3bd9baacee"
+          },
+          "preview_19f9e137c21d": {
+            "kind": "sha256_v1",
+            "size_bytes": 248202,
+            "sha256": "819ecd8704762898292bf8e820aef798db8f002d6187993a039756631cc27c6d"
+          },
+          "preview_11aa8fb232f3": {
+            "kind": "sha256_v1",
+            "size_bytes": 71377,
+            "sha256": "8fdd57e1e2fe3292389626866efbf002ff5d0ae4e0ef208309c48cdfe7c5f5cc"
+          },
+          "preview_896c78845d53": {
+            "kind": "sha256_v1",
+            "size_bytes": 112616,
+            "sha256": "434871c33b0295eaa76555cb632b17184dcefef0e88bd5876db3d45a103fd055"
+          },
+          "preview_58a7cdf1b6b4": {
+            "kind": "sha256_v1",
+            "size_bytes": 87922,
+            "sha256": "f35a26b52551ec3d62d4e4ad39ef8fccc101588ddf90d8c2eaecbc8902501f15"
+          },
+          "preview_bc7f1fb0218d": {
+            "kind": "sha256_v1",
+            "size_bytes": 257256,
+            "sha256": "5351644e4fd79c7454246f3a77e9203b0ac9cd1d38065d889b7c250ca0588fd4"
+          },
+          "preview_2d181f32c2d7": {
+            "kind": "sha256_v1",
+            "size_bytes": 117785,
+            "sha256": "4ab17e299e6c7ba2bbce51591fa8aef1c1fa41b840c7bf54f4534463e71d5ca4"
+          },
+          "preview_f01a4d63bdb8": {
+            "kind": "sha256_v1",
+            "size_bytes": 102266,
+            "sha256": "d34cb636e111ebac4e4d65f55237d005418e139e66e8a4821f3cf2a1544b57f4"
+          },
+          "preview_62238a4b6e52": {
+            "kind": "sha256_v1",
+            "size_bytes": 68415,
+            "sha256": "38d1cbe3e4c654be46163f87350b4604ab60572a3c3d2921dfa0c253a67efb56"
+          },
+          "preview_91d891955053": {
+            "kind": "sha256_v1",
+            "size_bytes": 185706,
+            "sha256": "aa2a06707d621faece47de2be0b5dbba159e014b17112b16e63a04ba24bcdaf3"
+          }
+        },
+        "chunk_plan_fingerprint": {
+          "kind": "sha256_v1",
+          "size_bytes": 677,
+          "sha256": "957fddcaf5e289f789c9b856a096ea81cc961f50b66a68d4808c72b7661b6b86"
+        },
+        "status": "rendered",
+        "rendered_at": "2026-06-22T07:33:28Z",
+        "artifact_fingerprint": {
+          "kind": "stat_v1",
+          "size_bytes": 11035957,
+          "modified_ns": 1782113607636306200
+        }
+      }
+    },
+    "final": {
+      "path": "final.mp4",
+      "status": "rendered",
+      "chunk_ids": [
+        "chunk_001"
+      ],
+      "chunk_paths": [
+        "renders/chunks/chunk_001.mp4"
+      ],
+      "duration_seconds": 145.125,
+      "composed_at": "2026-06-22T07:33:29Z",
+      "source_fingerprints": {
+        "chunk_001": {
+          "kind": "stat_v1",
+          "size_bytes": 11035957,
+          "modified_ns": 1782113607636306200
+        }
+      },
+      "timeline_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 237,
+        "sha256": "aad6d8a84dacbcfd2c2501e6ba98e9456764389b4bdd69d72b43b6361dc0d18a"
+      },
+      "chunk_plan_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 677,
+        "sha256": "957fddcaf5e289f789c9b856a096ea81cc961f50b66a68d4808c72b7661b6b86"
+      },
+      "artifact_fingerprint": {
+        "kind": "stat_v1",
+        "size_bytes": 11036821,
+        "modified_ns": 1782113609293981400
+      }
+    }
+  },
+  "verification": {
+    "final": {
+      "path": "verification/final.json",
+      "source": "final.mp4",
+      "method": "ffprobe_youtube_1080p_sdr_v0",
+      "status": "passed",
+      "error_count": 0,
+      "warning_count": 2,
+      "verified_at": "2026-06-22T07:33:31Z",
+      "source_fingerprint": {
+        "kind": "stat_v1",
+        "size_bytes": 11036821,
+        "modified_ns": 1782113609293981400
+      },
+      "artifact_fingerprint": {
+        "kind": "sha256_v1",
+        "size_bytes": 2519,
+        "sha256": "6d98ee56f72f4d424fb48b7ba73137e700481aec06042274cee4fc8774c237b2"
+      }
+    }
+  },
+  "layout": {
+    "version": 1,
+    "slug": "neha-much",
+    "inputs_root": "../../inputs/Neha_much",
+    "outputs_root": "../../outputs/neha-much"
+  },
+  "timeline": {
+    "policy": "full_raw_v1",
+    "start": 0.0,
+    "end": 145.124717,
+    "duration_seconds": 145.124717,
+    "source": "../../inputs/Neha_much/VID-20260112-WA0002.mp4",
+    "source_fingerprint": {
+      "kind": "stat_v1",
+      "size_bytes": 23411621,
+      "modified_ns": 1770478007128229100
+    }
+  },
+  "chunking": {
+    "method": "aligned_blocks_contiguous_v1",
+    "source_alignment": "alignment/script_alignment.json",
+    "source_fingerprint": {
+      "kind": "sha256_v1",
+      "size_bytes": 18074,
+      "sha256": "fb12625985cfb9b4036a87b504663d060e132a63b2ed859f36d0164e89141c5b"
+    },
+    "timeline_fingerprint": {
+      "kind": "sha256_v1",
+      "size_bytes": 237,
+      "sha256": "aad6d8a84dacbcfd2c2501e6ba98e9456764389b4bdd69d72b43b6361dc0d18a"
+    },
+    "options": {
+      "target_seconds": 180.0,
+      "min_seconds": 90.0,
+      "max_seconds": 240.0
+    },
+    "chunk_plan_fingerprint": {
+      "kind": "sha256_v1",
+      "size_bytes": 677,
+      "sha256": "957fddcaf5e289f789c9b856a096ea81cc961f50b66a68d4808c72b7661b6b86"
+    },
+    "coverage": {
+      "start": 0.0,
+      "end": 145.124717,
+      "duration_seconds": 145.124717,
+      "covered_duration_seconds": 145.124717,
+      "head_gap_seconds": 0.0,
+      "tail_gap_seconds": 0.0,
+      "internal_gap_seconds": 0.0,
+      "overlap_seconds": 0.0,
+      "complete": true
+    },
+    "created_at": "2026-06-21T21:44:50Z"
+  }
+}

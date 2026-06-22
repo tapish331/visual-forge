@@ -80,6 +80,45 @@ def test_render_chunk_layout_project_writes_outputs(tmp_path: Path) -> None:
     assert not (project_dir / "renders" / "chunks" / "chunk_001.mp4").exists()
 
 
+def test_render_chunk_accepts_mp4_visual_preview(tmp_path: Path) -> None:
+    project_dir = prepared_legacy_project(tmp_path)
+    project = load_project(project_dir)
+    preview_file = project_dir / "previews" / "preview_001.mp4"
+    preview_file.write_bytes(b"fake animated preview")
+    visual = record_list(project, "visuals")[0]
+    visual["template_ref"] = "animated_opening_hook"
+    visual["template_id"] = "animated_opening_hook"
+    visual["params"] = {"title": "Animated"}
+    preview = record_list(project, "previews")[0]
+    preview["template_ref"] = "animated_opening_hook"
+    preview["template_id"] = "animated_opening_hook"
+    preview["params"] = {"title": "Animated"}
+    preview["output"] = "previews/preview_001.mp4"
+    preview["output_type"] = "mp4"
+    preview["duration_seconds"] = 2.0
+    preview["template_version"] = "1.0.0"
+    preview["template_fingerprint"] = sha256_fingerprint(REPO_ROOT / "templates" / "animated_opening_hook.py")
+    preview["artifact_fingerprint"] = sha256_fingerprint(preview_file)
+    write_project_json(project_dir, project)
+    ffmpeg = fake_ffmpeg(tmp_path)
+    args_file = tmp_path / "ffmpeg-args.json"
+
+    result = run_cli(
+        "render-chunk",
+        project_dir,
+        "chunk_001",
+        "--json",
+        env=fake_env(ffmpeg, args_path=args_file),
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    args = json.loads(args_file.read_text(encoding="utf-8"))
+    assert isinstance(args, list)
+    assert "previews\\preview_001.mp4" in " ".join(str(item) for item in args) or "previews/preview_001.mp4" in " ".join(str(item) for item in args)
+    filter_value = args[args.index("-filter_complex") + 1]
+    assert "[1:v]trim=duration=2" in filter_value
+
+
 def test_render_chunk_human_output_is_compact(tmp_path: Path) -> None:
     project_dir = prepared_legacy_project(tmp_path)
     ffmpeg = fake_ffmpeg(tmp_path)
